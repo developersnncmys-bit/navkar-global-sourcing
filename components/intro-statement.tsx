@@ -318,7 +318,7 @@ export function IntroStatement() {
                         keeps the digits legible on the busy video without
                         needing a heavier overlay. */}
                     <span
-                      className="serif tabular-nums text-[clamp(42px,4.6vw,66px)] wide:text-[80px] leading-[0.95] tracking-[-0.02em] text-ivory-on-dark"
+                      className="serif tabular-nums text-[clamp(30px,3vw,48px)] wide:text-[60px] leading-[0.95] tracking-[-0.02em] text-ivory-on-dark"
                       style={{
                         textShadow:
                           "0 2px 4px rgba(0,0,0,0.55), 0 6px 20px rgba(0,0,0,0.65)",

@@ -107,7 +107,7 @@ export function GroupCompaniesSection() {
         // HOLD_RATIO — same idea at the end (View All card is fully
         // visible before the next section reveals).
         const START_HOLD_RATIO = 0.2;
-        const HOLD_RATIO = 0.4;
+        const HOLD_RATIO = 0.9;
 
         const tl = gsap.timeline({
           scrollTrigger: {

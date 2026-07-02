@@ -23,7 +23,7 @@ export function PageHero({
   videoSrc = "/hero/clientellevideo-web.mp4",
   ariaLabel,
 }: {
-  eyebrow: string;
+  eyebrow?: string;
   /** Headline text. Wrap with <br/> to break lines. */
   headline: string;
   subtitle?: ReactNode;
@@ -52,18 +52,21 @@ export function PageHero({
         return;
       }
 
-      gsap.set(eyebrowRef.current, { opacity: 0, y: 20 });
+      if (eyebrowRef.current)
+        gsap.set(eyebrowRef.current, { opacity: 0, y: 20 });
       if (words?.length) gsap.set(words, { opacity: 0, y: 24 });
       gsap.set(subtitleRef.current, { opacity: 0, y: 20 });
       if (metaItems?.length) gsap.set(metaItems, { opacity: 0, y: 20 });
 
       const tl = gsap.timeline({ delay: 0.2 });
-      tl.to(eyebrowRef.current, {
-        opacity: 1,
-        y: 0,
-        duration: 0.7,
-        ease: "power2.out",
-      });
+      if (eyebrowRef.current) {
+        tl.to(eyebrowRef.current, {
+          opacity: 1,
+          y: 0,
+          duration: 0.7,
+          ease: "power2.out",
+        });
+      }
       if (words?.length) {
         tl.to(
           words,
@@ -150,20 +153,9 @@ export function PageHero({
 
       <div className="relative z-30 px-6 sm:px-10 wide:px-16 pt-32 sm:pt-32 pb-24 sm:pb-32 min-h-screen flex flex-col justify-center">
         <div className="mx-auto max-w-[1320px] wide:max-w-[1560px] w-full">
-          <span
-            ref={eyebrowRef}
-            className="label inline-flex items-center gap-2.5 text-ivory-on-dark/75"
-          >
-            <span
-              aria-hidden="true"
-              className="block h-1.5 w-1.5 rounded-full bg-accent-soft"
-            />
-            {eyebrow}
-          </span>
-
           <h1
             ref={headlineRef}
-            className="serif font-bold mt-6 mx-auto text-center text-[clamp(34px,4.4vw,72px)] leading-[1.08] text-balance max-w-[1050px] text-ivory-on-dark"
+            className="serif font-bold mx-auto text-center text-[clamp(34px,4.4vw,72px)] leading-[1.08] text-balance max-w-[1050px] text-ivory-on-dark"
           >
             {lines.map((line, li) => (
               <Fragment key={li}>
@@ -184,15 +176,35 @@ export function PageHero({
           </h1>
 
           {(subtitle || meta) && (
-            <div className="mt-10 grid gap-10 lg:grid-cols-12 lg:items-end">
+            <div
+              className={`grid gap-10 lg:grid-cols-12 lg:items-end ${
+                meta ? "mt-24 sm:mt-32" : "mt-8 sm:mt-10"
+              }`}
+            >
               {subtitle && (
                 <div
-                  ref={subtitleRef}
                   className={`${
                     meta ? "lg:col-span-7" : "lg:col-span-12 mx-auto text-center"
-                  } max-w-2xl text-[17px] sm:text-[19px] text-ivory-on-dark/80 leading-relaxed text-pretty`}
+                  } max-w-2xl`}
                 >
-                  {subtitle}
+                  {eyebrow && (
+                    <span
+                      ref={eyebrowRef}
+                      className="label inline-flex items-center gap-2.5 text-ivory-on-dark/75"
+                    >
+                      <span
+                        aria-hidden="true"
+                        className="block h-1.5 w-1.5 rounded-full bg-accent-soft"
+                      />
+                      {eyebrow}
+                    </span>
+                  )}
+                  <div
+                    ref={subtitleRef}
+                    className={`${eyebrow ? "mt-4" : ""} text-[17px] sm:text-[19px] text-ivory-on-dark/80 leading-relaxed text-pretty`}
+                  >
+                    {subtitle}
+                  </div>
                 </div>
               )}
               {meta && (
@@ -200,7 +212,7 @@ export function PageHero({
                   ref={metaRef}
                   className={`${
                     subtitle ? "lg:col-span-5" : "lg:col-span-12"
-                  } grid grid-cols-${Math.min(meta.length, 4)} gap-4 sm:gap-6 border-t border-white/15 pt-6`}
+                  } grid grid-cols-${Math.min(meta.length, 4)} gap-4 sm:gap-6`}
                 >
                   {meta.map((m) => (
                     <div key={m.label} data-meta className="flex flex-col gap-2">

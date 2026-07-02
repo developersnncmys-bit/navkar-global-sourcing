@@ -162,7 +162,7 @@ export function ProductCategories() {
     <section
       ref={rootRef}
       data-nav-theme="light"
-      className="relative w-full overflow-hidden h-screen bg-background -mt-px"
+      className="relative w-full overflow-hidden h-screen bg-background -mt-2"
     >
       {/* Dark entry overlay — dissolves as the section climbs into view,
           bridging the black Worries section above into this light one. */}

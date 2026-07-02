@@ -6,7 +6,7 @@ import {
   NotificationsFilter,
   NotificationsFeed,
 } from "@/components/notifications-feed";
-import { company, latestUpdates } from "@/lib/content";
+import { company } from "@/lib/content";
 
 export const metadata: Metadata = {
   title: `Notifications — ${company.name}`,
@@ -23,15 +23,10 @@ export default function NotificationsPage() {
   return (
     <>
       <PageHero
-        eyebrow="Notifications"
         headline="DGFT · Customs · GST <br /> monitored daily."
         subtitle="A live feed of notifications and circulars the Navkar Global Sourcing advisory desk tracks on behalf of every client engagement."
         videoSrc="/hero/notifi-web.mp4"
-        meta={[
-          { value: String(latestUpdates.length).padStart(2, "0"), label: "Live briefs" },
-          { value: "3", label: "Feeds tracked" },
-          { value: "24h", label: "Refresh window" },
-        ]}
+        ariaLabel="Notifications hero"
       />
       <NotificationsBody>
         <Suspense fallback={null}>

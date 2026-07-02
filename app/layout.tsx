@@ -19,6 +19,17 @@ export const metadata: Metadata = {
   description: company.shortDescription,
 };
 
+// Runs synchronously during HTML parse, BEFORE first paint and before
+// React hydrates. If we're loading the home page, apply the
+// `.home-accent` class to <html> so the accent CSS variable resolves
+// to the bright ocean-blue from the very first frame — no FOUC flash
+// from the base teal to the home-blue after hydration.
+const homeAccentInitScript = `try {
+  if (window.location.pathname === '/' || window.location.pathname === '') {
+    document.documentElement.classList.add('home-accent');
+  }
+} catch (e) {}`;
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -27,6 +38,13 @@ export default function RootLayout({
   return (
     <html lang="en" className={`h-full antialiased ${jakarta.variable}`}>
       <head>
+        {/* Home-accent init — runs before first paint (see
+            `homeAccentInitScript` above) so `/` never flashes the base
+            teal before the ocean-blue home palette settles in. */}
+        <script
+          id="home-accent-init"
+          dangerouslySetInnerHTML={{ __html: homeAccentInitScript }}
+        />
         {/*
           Warm up the connection to Pexels' image CDN — that's where the
           services rail's panel photos come from. Emitted server-side so

@@ -21,6 +21,10 @@ export function Navbar() {
   const [theme, setTheme] = useState<Theme>("dark");
   const [open, setOpen] = useState(false);
   const [openMenu, setOpenMenu] = useState<string | null>(null);
+  // Sticky mode: past the first section (hero), the navbar transforms from
+  // a floating pill to a full-width bar with taller height. Detected by
+  // scroll position crossing 85% of viewport height.
+  const [isSticky, setIsSticky] = useState(false);
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Watch which themed section is under the navbar to flip text colors.
@@ -65,6 +69,40 @@ export function Navbar() {
     setOpenMenu(null);
   }, [pathname]);
 
+  // Sticky trigger — flip to sticky mode only once the hero (first
+  // section) has fully scrolled out of view. While ANY part of the hero
+  // is still visible the pill stays. Measured against the first child of
+  // <main>, whatever the current page's hero happens to be.
+  useEffect(() => {
+    let raf = 0;
+    const update = () => {
+      raf = 0;
+      const hero = document.querySelector<HTMLElement>("main > *:first-child");
+      if (!hero) {
+        setIsSticky(false);
+        return;
+      }
+      const rect = hero.getBoundingClientRect();
+      // Hero bottom has crossed the viewport top → we're inside the
+      // second section (or later). Small buffer so the switch happens
+      // just as the seam meets the navbar rather than a few pixels late.
+      setIsSticky(rect.bottom <= 4);
+    };
+    const onScroll = () => {
+      if (raf) return;
+      raf = requestAnimationFrame(update);
+    };
+    const t = setTimeout(update, 0);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", update);
+    return () => {
+      clearTimeout(t);
+      if (raf) cancelAnimationFrame(raf);
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", update);
+    };
+  }, [pathname]);
+
   const enter = (key: string) => {
     if (closeTimer.current) clearTimeout(closeTimer.current);
     setOpenMenu(key);
@@ -90,28 +128,48 @@ export function Navbar() {
         : "text-ivory-on-dark/80 hover:text-ivory-on-dark";
 
   return (
-    <header className="fixed top-3 sm:top-4 wide:top-5 inset-x-0 z-50 px-3 sm:px-5">
-      {/* Floating pill — rounded-full container, tinted glass, soft shadow. */}
+    <header
+      className={`fixed inset-x-0 z-50 transition-[top,padding] duration-500 ${
+        isSticky
+          ? "top-0 px-0"
+          : "top-3 sm:top-4 wide:top-5 px-3 sm:px-5"
+      }`}
+    >
+      {/* Sticky mode: full-width solid bar (taller, no gap for content
+          bleed). Non-sticky (over hero): floating rounded pill. */}
       <div
-        className={`mx-auto max-w-[1500px] wide:max-w-[1720px] rounded-full transition-colors duration-500 backdrop-blur-xl ${
-          showLightBg
-            ? "bg-white/80 border border-black/[0.06] shadow-[0_10px_30px_-12px_rgba(11,18,32,0.18)]"
-            : "bg-ink/50 shadow-[0_10px_30px_-12px_rgba(0,0,0,0.45)]"
+        className={`transition-all duration-500 backdrop-blur-xl ${
+          isSticky
+            ? showLightBg
+              ? "w-full bg-white/90 border-b border-black/[0.06]"
+              : "w-full bg-ink/85"
+            : showLightBg
+              ? "mx-auto max-w-[1500px] wide:max-w-[1720px] rounded-full bg-white/80 border border-black/[0.06] shadow-[0_10px_30px_-12px_rgba(11,18,32,0.18)]"
+              : "mx-auto max-w-[1500px] wide:max-w-[1720px] rounded-full bg-ink/50 shadow-[0_10px_30px_-12px_rgba(0,0,0,0.45)]"
         }`}
         style={
-          showLightBg
-            ? undefined
-            : {
-                /* Sub-pixel hairline — renders as a true half-pixel line on
-                   high-DPI displays, much thinner than Tailwind's 1px
-                   border. Keeps the pill edge defined without the visual
-                   weight of a full-pixel stroke. */
-                boxShadow:
-                  "0 10px 30px -12px rgba(0,0,0,0.45), inset 0 0 0 0.5px rgba(255,255,255,0.22)",
-              }
+          !showLightBg
+            ? isSticky
+              ? {
+                  /* Sub-pixel hairline bottom — a true half-pixel line on
+                     high-DPI displays instead of Tailwind's 1px border. */
+                  boxShadow: "inset 0 -0.5px 0 rgba(255,255,255,0.14)",
+                }
+              : {
+                  /* Sub-pixel hairline around the whole pill + drop shadow. */
+                  boxShadow:
+                    "0 10px 30px -12px rgba(0,0,0,0.45), inset 0 0 0 0.5px rgba(255,255,255,0.22)",
+                }
+            : undefined
         }
       >
-      <div className="px-5 sm:px-7 lg:px-8 wide:px-10 flex h-[56px] sm:h-[60px] wide:h-[76px] items-center justify-between gap-6">
+      <div
+        className={`transition-[height,padding] duration-500 flex items-center justify-between gap-6 ${
+          isSticky
+            ? "px-6 sm:px-10 lg:px-12 wide:px-16 h-[64px] sm:h-[72px] wide:h-[84px]"
+            : "px-5 sm:px-7 lg:px-8 wide:px-10 h-[64px] sm:h-[70px] wide:h-[88px]"
+        }`}
+      >
         {/* Logo */}
         <Link
           href="/"

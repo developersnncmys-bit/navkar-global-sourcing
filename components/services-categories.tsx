@@ -3,46 +3,33 @@
 import { useRef } from "react";
 import { useGSAP } from "@gsap/react";
 import { gsap, ScrollTrigger } from "@/lib/gsap";
-import {
-  Shirt,
-  Gem,
-  Armchair,
-  Watch,
-  Smartphone,
-  PenTool,
-  Wrench,
-  Truck,
-  Gift,
-  Briefcase,
-  ToyBrick,
-  type LucideIcon,
-} from "lucide-react";
 import { SectionShell, Eyebrow } from "./ui";
 
 /**
- * Services categories — the "what we source" beat. Light-mode counterpart
- * to the home ProductCategories: same 12-col grid layout, same accent
- * timeline lines that sweep in per cell, same pin + scrubbed reveal
- * choreography — but rendered on the light background so it acts as a
- * palate cleanser after the dark plans grid.
+ * Services categories — mirrors the home ProductCategories tile grid so the
+ * "what we source" beat looks the same across both surfaces: full-bleed
+ * image cards with a bottom-gradient label, revealed with a 3D flip + scale
+ * wave that radiates from the centre of the grid.
  *
- * Because the previous section (PlansGrid) is dark, a dark overlay covers
- * this section on entry and dissolves 1 → 0 as its top edge reaches the
- * viewport top — same seam handoff used at the IntroStatement entry on
- * home.
+ * Seam handling differs from home: the previous PlansGrid is dark and this
+ * section sits behind it (`-mt-[100vh]` + `z-10`), so PlansGrid naturally
+ * covers the entry — no dark overlay needed here.
  */
-const categories: { label: string; icon: LucideIcon }[] = [
-  { label: "Toys", icon: ToyBrick },
-  { label: "Clothing", icon: Shirt },
-  { label: "Jewellery", icon: Gem },
-  { label: "Furniture", icon: Armchair },
-  { label: "Accessories", icon: Watch },
-  { label: "Electronics", icon: Smartphone },
-  { label: "Stationery", icon: PenTool },
-  { label: "Hardware", icon: Wrench },
-  { label: "Machinery & vehicles", icon: Truck },
-  { label: "Home decor & gifts", icon: Gift },
-  { label: "Footwear & bags", icon: Briefcase },
+const pexels = (id: number, w = 800) =>
+  `https://images.pexels.com/photos/${id}/pexels-photo-${id}.jpeg?auto=compress&cs=tinysrgb&w=${w}`;
+
+const categories: { label: string; src: string }[] = [
+  { label: "Toys", src: pexels(4491702) },
+  { label: "Clothing", src: pexels(18699670) },
+  { label: "Jewellery", src: pexels(2732096) },
+  { label: "Furniture", src: pexels(6580377) },
+  { label: "Accessories", src: pexels(31642726) },
+  { label: "Electronics", src: pexels(3520692) },
+  { label: "Stationery", src: pexels(29997001) },
+  { label: "Hardware", src: pexels(31501005) },
+  { label: "Machinery & vehicles", src: pexels(11666903) },
+  { label: "Home decor & gifts", src: pexels(5793645) },
+  { label: "Footwear & bags", src: pexels(36182255) },
 ];
 
 export function ServicesCategories() {
@@ -60,67 +47,77 @@ export function ServicesCategories() {
       const mm = gsap.matchMedia();
 
       mm.add("(min-width: 768px)", () => {
-        const cells = gridRef.current?.querySelectorAll<HTMLDivElement>(
-          "[data-cell]",
-        );
-        const lines = gridRef.current?.querySelectorAll<HTMLSpanElement>(
-          "[data-line]",
+        const cards = gridRef.current?.querySelectorAll<HTMLElement>(
+          "[data-card]",
         );
 
-        if (introRef.current) gsap.set(introRef.current, { opacity: 0, y: 24 });
-        if (cells?.length) gsap.set(cells, { opacity: 0.15 });
-        if (lines?.length) gsap.set(lines, { scaleX: 0 });
+        if (introRef.current)
+          gsap.set(introRef.current, { opacity: 0, y: 24 });
+        if (cards?.length) {
+          gsap.set(cards, {
+            opacity: 0,
+            y: 80,
+            scale: 0.62,
+            rotationX: -55,
+            transformOrigin: "50% 100%",
+            transformPerspective: 1000,
+          });
+        }
 
-        // No dark overlay — the section is light from the moment it enters
-        // view, so the previous dark PlansGrid reads as sliding up off
-        // this stationary light section (reveal pattern) rather than the
-        // light appearing over the dark (cover pattern).
+        // Pin budget: 100vh hold while PlansGrid finishes sliding up, 100vh
+        // reveal, then ~200vh stationary hold before the section unpins and
+        // hands off downstream. Total 400vh.
         const pin = ScrollTrigger.create({
           trigger: rootRef.current,
           start: "top top",
-          end: "+=300%",
+          end: "+=400%",
           pin: true,
           pinSpacing: true,
           invalidateOnRefresh: true,
         });
 
+        // Scrubbed reveal — the first 100vh of the pin is a no-op "hold"
+        // so PlansGrid can clear the viewport completely; only then does
+        // the flip cascade fire on the next scroll tick.
         const tl = gsap.timeline({
           scrollTrigger: {
             trigger: rootRef.current,
             start: "top top",
-            end: "+=100%",
+            end: "+=200%",
             scrub: true,
             invalidateOnRefresh: true,
           },
         });
 
+        // Empty tween occupying the first half of the timeline (0 → 100vh
+        // of scroll). Nothing animates; cards stay at their initial flipped
+        // state while PlansGrid completes its slide-up.
+        tl.to({}, { duration: 1 });
+
         if (introRef.current) {
           tl.to(
             introRef.current,
-            { opacity: 1, y: 0, ease: "none", duration: 0.25 },
-            0,
+            { opacity: 1, y: 0, ease: "none", duration: 0.2 },
+            1,
           );
         }
-        if (lines?.length && cells?.length) {
+
+        if (cards?.length) {
           tl.to(
-            cells,
+            cards,
             {
               opacity: 1,
-              ease: "power1.out",
-              stagger: { each: 0.12, from: "start" },
-              duration: 0.35,
+              y: 0,
+              scale: 1,
+              rotationX: 0,
+              ease: "power3.out",
+              stagger: {
+                each: 0.06,
+                from: "center",
+              },
+              duration: 0.5,
             },
-            0.2,
-          );
-          tl.to(
-            lines,
-            {
-              scaleX: 1,
-              ease: "power2.out",
-              stagger: { each: 0.12, from: "start" },
-              duration: 0.4,
-            },
-            0.2,
+            1.18,
           );
         }
 
@@ -138,63 +135,60 @@ export function ServicesCategories() {
 
   return (
     // -mt-[100vh] parks this section directly behind the tail of the
-    // PlansGrid so as the (higher-z) plans grid naturally scrolls off
-    // the top, this light categories section is revealed underneath —
-    // "blue slides up, white remains there" reveal pattern.
+    // PlansGrid so the (higher-z) plans grid naturally scrolls off the
+    // top, revealing this light categories section underneath.
     <section
       ref={rootRef}
       data-nav-theme="light"
-      className="relative w-full overflow-hidden min-h-screen -mt-[100vh] z-10 bg-background"
+      className="relative w-full overflow-hidden h-screen -mt-[100vh] z-10 bg-background"
     >
       <SectionShell
-        className="relative z-10 min-h-screen flex flex-col justify-center py-16"
+        className="h-full flex flex-col justify-center py-8 sm:py-10"
         data-nav-theme="light"
       >
         <div ref={introRef} className="mx-auto max-w-[900px] text-center">
           <Eyebrow>What we source</Eyebrow>
-          <h2 className="serif font-black mt-4 text-[clamp(28px,3.4vw,48px)] leading-[1.05] tracking-[-0.025em] text-foreground text-balance">
+          <h2 className="mt-3 text-[clamp(26px,3vw,44px)] font-bold leading-[1.05] tracking-[-0.025em] text-foreground text-balance">
             Categories{" "}
-            <span className="serif-italic text-accent font-black whitespace-nowrap">
+            <span className="italic text-accent font-bold whitespace-nowrap">
               we cater to.
             </span>
           </h2>
-          <p className="mt-4 text-[15px] sm:text-[16px] text-muted leading-relaxed text-pretty max-w-[640px] mx-auto">
+          <p className="mt-3 text-[13px] sm:text-[14px] text-muted leading-relaxed text-pretty max-w-[560px] mx-auto">
             Every plan above can be applied to the product lines our clients
             actually trade in — from bulk hardware to boutique jewellery.
           </p>
         </div>
 
-        {/* Grid — 6 tiles row 1, 5 tiles row 2 centered. 12-col so each
-            cell spans 2 cols; the 7th cell offsets col-start-2 to centre
-            row 2's five cells. Hairline frame via cell border-r + border-b
-            (outer border-t + border-l provided by the grid). */}
         <div
           ref={gridRef}
-          className="mt-8 mx-auto w-full max-w-[1200px] grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-12 border-t border-l border-border"
+          className="mt-6 sm:mt-8 mx-auto w-full max-w-[1280px] flex flex-wrap justify-center gap-3 sm:gap-4 lg:gap-5"
+          style={{ perspective: "1000px" }}
         >
-          {categories.map(({ label, icon: Icon }, i) => (
-            <div
+          {categories.map(({ label, src }) => (
+            <article
               key={label}
-              data-cell
-              className={`group relative border-r border-b border-border p-4 sm:p-5 flex flex-col items-center justify-center gap-2 min-h-[100px] sm:min-h-[110px] transition-colors duration-500 hover:bg-surface/60 lg:col-span-2 ${
-                i === 6 ? "lg:col-start-2" : ""
-              }`}
+              data-card
+              className="group relative overflow-hidden rounded-2xl aspect-[5/4] w-[calc(50%-6px)] sm:w-[calc(33.333%-11px)] lg:w-[calc(25%-15px)] bg-surface shadow-[0_10px_30px_-15px_rgba(11,18,32,0.35)] hover:shadow-[0_24px_50px_-20px_rgba(11,18,32,0.5)] transition-shadow duration-500 will-change-transform"
             >
-              <span
-                data-line
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={src}
+                alt={label}
+                loading="lazy"
+                decoding="async"
+                className="absolute inset-0 h-full w-full object-cover transition-transform duration-[1100ms] ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.4]"
+              />
+              <div
                 aria-hidden
-                className="absolute bottom-0 left-0 right-0 h-[2px] bg-accent origin-left pointer-events-none"
-                style={{ transform: "scaleX(0)" }}
+                className="pointer-events-none absolute inset-0 bg-gradient-to-t from-ink/85 via-ink/25 to-transparent"
               />
-              <Icon
-                data-icon
-                className="h-6 w-6 sm:h-7 sm:w-7 text-foreground transition-colors duration-500 group-hover:text-accent"
-                strokeWidth={1.4}
-              />
-              <span className="text-[12px] sm:text-[13px] font-medium text-foreground text-center leading-tight">
-                {label}
-              </span>
-            </div>
+              <div className="absolute inset-x-0 bottom-0 p-4 sm:p-5 transition-transform duration-500 ease-out group-hover:-translate-y-1">
+                <span className="text-[13px] sm:text-[15px] font-semibold text-ivory tracking-tight">
+                  {label}
+                </span>
+              </div>
+            </article>
           ))}
         </div>
       </SectionShell>
