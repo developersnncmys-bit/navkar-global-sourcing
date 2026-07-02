@@ -1,0 +1,29 @@
+# Netlify build config — explicit so the runtime detector never guesses.
+# This site uses Next.js static export (`output: "export"` in
+# next.config.ts), so Netlify serves the pre-rendered files in `out/`
+# directly instead of running the Next.js SSR runtime plugin.
+
+[build]
+  command = "npm run build"
+  publish = "out"
+
+[build.environment]
+  # Silence the auto-installed Next.js runtime — we're static-export
+  # only, we don't want Netlify wrapping the build in its SSR shim.
+  NEXT_TELEMETRY_DISABLED = "1"
+  NETLIFY_NEXT_PLUGIN_SKIP = "true"
+
+# Long-cache the hashed static asset chunks. Next.js filenames include
+# a content hash, so stale CSS/JS can't linger — the HTML always points
+# at the current hash, and old files fall out of edge cache naturally.
+[[headers]]
+  for = "/_next/static/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# HTML files should never be cached hard — otherwise CSS/JS updates
+# (which the HTML references by fresh hashes) never reach the user.
+[[headers]]
+  for = "/*.html"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
