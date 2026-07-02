@@ -1,0 +1,184 @@
+@import "tailwindcss";
+
+:root {
+  color-scheme: light;
+  /* white default, deep navy for dark bands, ocean-blue accent */
+  --background: #ffffff;       /* white */
+  --ivory: #f8fafd;            /* near-white, very faint cool tint */
+  --surface: #f1f5fa;           /* light cool surface */
+  --border: #e3e9f1;
+  --border-strong: #c8d4e3;
+
+  --foreground: #0b1220;       /* ink (text on white) */
+  --muted: #4a5568;
+  --muted-2: #7a869a;
+
+  /* Dark section tokens (inverted — deep navy) */
+  --ink: #0b1220;
+  --espresso: #0a1726;
+  --cocoa: #14263d;
+  --border-dark: #1b2e47;
+  --border-dark-strong: #2a4060;
+  --ivory-on-dark: #eaf2fb;
+  --muted-on-dark: #9fb2ca;
+  --muted-on-dark-2: #6a7e98;
+
+  --accent: #1f8790;           /* teal — brand accent (site-wide default) */
+  --accent-soft: #5eb4bd;      /* soft teal — same hue, lighter for scrims / hover */
+}
+
+@theme {
+  /* Custom breakpoint for viewports above the user's 1520px baseline.
+     Registered in @theme (not @theme inline) so Tailwind generates the
+     `wide:` variant. Used to bump container widths and shrink section
+     min-heights on larger displays without touching anything at <= 1520. */
+  --breakpoint-wide: 1521px;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-ivory: var(--ivory);
+  --color-surface: var(--surface);
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
+  --color-muted-2: var(--muted-2);
+
+  --color-ink: var(--ink);
+  --color-espresso: var(--espresso);
+  --color-cocoa: var(--cocoa);
+  --color-border-dark: var(--border-dark);
+  --color-border-dark-strong: var(--border-dark-strong);
+  --color-ivory-on-dark: var(--ivory-on-dark);
+  --color-muted-on-dark: var(--muted-on-dark);
+  --color-muted-on-dark-2: var(--muted-on-dark-2);
+
+  --color-accent: var(--accent);
+  --color-accent-soft: var(--accent-soft);
+
+  /* Body uses the OS UI sans-serif stack.
+     Headings + display text use Plus Jakarta Sans (loaded in app/layout.tsx
+     via next/font as the CSS variable --font-jakarta) with safe fallbacks. */
+  --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, Ubuntu, Cantarell,
+    "Noto Sans", sans-serif;
+  --font-display: var(--font-jakarta), "Plus Jakarta Sans", "Helvetica Neue",
+    Helvetica, Arial, sans-serif;
+}
+
+* {
+  border-color: var(--border);
+}
+
+html,
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+::selection {
+  background: var(--accent);
+  color: var(--ink);
+}
+
+/* Home page palette preview — bright ocean blue accent.
+   Scoped via `.home-accent` on the home page's root wrapper only, so
+   the rest of the site keeps its deeper base blue. If approved,
+   promote these values to :root and remove this block + the wrapper
+   class. */
+.home-accent {
+  --accent: #0ea5e9;           /* bright ocean blue — sky-500, vivid */
+  --accent-soft: #38bdf8;      /* brighter sky-400 highlight */
+}
+
+/* Dark section helper — invert tokens within a subtree */
+.dark-section {
+  background: var(--espresso);
+  color: var(--ivory-on-dark);
+  --background: var(--espresso);
+  --surface: var(--cocoa);
+  --foreground: var(--ivory-on-dark);
+  --muted: var(--muted-on-dark);
+  --muted-2: var(--muted-on-dark-2);
+  --border: var(--border-dark);
+  --border-strong: var(--border-dark-strong);
+}
+
+.text-balance { text-wrap: balance; }
+.text-pretty  { text-wrap: pretty; }
+
+/* Display headings — Plus Jakarta Sans, semi-bold.
+   Class is named `.serif` for legacy reasons across the codebase; it now
+   renders in a sans-serif display style. */
+.serif {
+  font-family: var(--font-display);
+  font-weight: 600;
+  letter-spacing: normal;
+  line-height: 0.96;
+}
+
+.serif-italic {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 600;
+  letter-spacing: normal;
+}
+
+.label {
+  font-size: 11px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+}
+
+.eyebrow-dot::before {
+  content: "";
+  display: inline-block;
+  width: 5px;
+  height: 5px;
+  border-radius: 999px;
+  background: var(--accent);
+  margin-right: 10px;
+  vertical-align: middle;
+}
+
+.warm-image {
+  background:
+    radial-gradient(60% 80% at 30% 30%, rgba(127, 182, 230, 0.30), transparent 70%),
+    radial-gradient(70% 70% at 80% 90%, rgba(20, 50, 90, 0.55), transparent 70%),
+    linear-gradient(160deg, #14263d 0%, #0a1726 60%, #050d18 100%);
+}
+
+.hero-vignette::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(180deg, rgba(5, 13, 24, 0.10) 0%, transparent 30%, rgba(5, 13, 24, 0.55) 100%),
+    radial-gradient(120% 80% at 50% 100%, rgba(5, 13, 24, 0.6), transparent 60%);
+  pointer-events: none;
+}
+
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+.animate-marquee      { animation: marquee 50s linear infinite; }
+.animate-marquee-slow { animation: marquee 80s linear infinite; }
+
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+.link-underline {
+  background-image: linear-gradient(currentColor, currentColor);
+  background-position: 0 100%;
+  background-repeat: no-repeat;
+  background-size: 0% 1px;
+  transition: background-size 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.link-underline:hover,
+.link-underline[data-active="true"] {
+  background-size: 100% 1px;
+}

@@ -1,0 +1,59 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+/node_modules
+/.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+
+# testing
+/coverage
+
+# next.js
+/.next/
+/out/
+
+# production
+/build
+
+# misc
+.DS_Store
+*.pem
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# env files (can opt-in for committing if needed)
+.env*
+
+# vercel
+.vercel
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+
+# Large source media files — GitHub blocks anything over 100 MB and warns
+# over 50 MB. These are the unoptimized source masters; only the
+# web-encoded `*-web.mp4` versions are committed and shipped to the site.
+# Originals stay on disk locally for re-encoding, never enter git.
+/public/hero/waveshero.mp4
+/public/hero/trade.mp4
+/public/hero/waves.mp4
+/public/hero/waves-loop.mp4
+/public/hero/about.mp4
+/public/hero/about-story.mp4
+/public/hero/clientellevideo.mp4
+/public/hero/notifi.mp4
+/public/hero/noti.mp4
+/public/hero/service.mp4
+/public/hero/statsvideo.mp4
+/public/images/statvideo.mp4
+/public/images/image.png

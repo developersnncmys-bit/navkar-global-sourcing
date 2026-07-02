@@ -1,0 +1,18 @@
+
+> star-group@0.1.0 dev
+> next dev
+
+⚠ Port 3000 is in use by process 7256, using available port 3001 instead.
+▲ Next.js 16.2.9 (Turbopack)
+- Local:         http://localhost:3001
+- Network:       http://172.20.112.1:3001
+✓ Ready in 2.0s
+⨯ Another next dev server is already running.
+
+- Local:        http://localhost:3000
+- PID:          7256
+- Dir:          D:\Ship\star-group
+- Log:          .next\dev\logs\next-development.log
+
+Run taskkill /PID 7256 /F to stop it.
+[?25h

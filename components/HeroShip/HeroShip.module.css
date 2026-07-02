@@ -1,0 +1,474 @@
+.root {
+  position: relative;
+  width: 100%;
+  height: 100svh;
+  min-height: 100svh;
+  overflow: hidden;
+  /* deep ocean base */
+  background: #06121f;
+  color: #eaf2fb;
+  /* hero-local blue palette (does not affect the rest of the site) */
+  --hero-accent: #7fb6e6;
+  --hero-accent-soft: #b5d3ee;
+}
+
+.video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 0;
+  pointer-events: none;
+  will-change: transform;
+  /* parallax scale baseline */
+  transform: scale(1);
+}
+
+.overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  /* Cool blue veil — kept light so when the GSAP-driven .darken layer
+     fades to 0, the final "undarkened" state shows mostly the video
+     with only a subtle tint. */
+  background:
+    radial-gradient(ellipse at 50% 30%, rgba(8, 22, 44, 0.06), rgba(4, 14, 30, 0.25) 75%),
+    linear-gradient(to bottom, rgba(6, 18, 36, 0.1), rgba(4, 12, 26, 0.2));
+}
+
+/* Full-screen darken layer — GSAP animates opacity from 1 → 0 over
+   scrolls 1-2 (timeline 0-2). Hero starts almost fully dark, brightens
+   completely by the end of scroll 2. */
+.darken {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: rgba(2, 6, 14, 0.7);
+  will-change: opacity;
+}
+
+/* Right-side gradient darken — GSAP fades this IN over scroll 3
+   (timeline 2-3). Dark on the right (where the ship was exiting),
+   softly fading to transparent on the left so the bulk of the hero
+   stays bright. */
+.darkenRight {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: linear-gradient(
+    to left,
+    rgba(2, 6, 14, 0.95) 0%,
+    rgba(2, 6, 14, 0.7) 18%,
+    rgba(2, 6, 14, 0.35) 40%,
+    rgba(2, 6, 14, 0.1) 62%,
+    transparent 80%
+  );
+  will-change: opacity;
+  opacity: 0;
+}
+
+/* Ship layer — sits ABOVE the centered text so the ship visually passes
+   over the headline as it sails across the hero. */
+.shipLayer {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  will-change: transform;
+}
+
+/* Hero copy: centered block. Inner content block defines the SHARED
+   width so all three text elements line up. Vertical padding reserves
+   breathing room for the floating navbar above and the scroll-hint
+   below, so the centered block doesn't crowd either edge. */
+.content {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: clamp(5rem, 10vh, 8rem) 1.5rem clamp(3rem, 6vh, 5rem);
+  pointer-events: none;
+}
+
+/* Inner block — fixed width, centered. Sized so the headline ("THE ART
+   OF CONSIDERED TRADE") balances into 2 lines ("THE ART OF" / "CONSIDERED
+   TRADE") instead of breaking awkwardly at clamp's max font size. */
+.contentBlock {
+  width: 100%;
+  max-width: min(56rem, 92vw);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Pronounced dark scrim behind the text — soft radial wash centered on
+   the text block. Bumped opacities so the text has a clear backdrop for
+   contrast / legibility, without darkening the whole hero. */
+.content::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: min(960px, 92vw);
+  height: clamp(320px, 42vh, 520px);
+  transform: translate(-50%, -50%);
+  background: radial-gradient(
+    ellipse at center,
+    rgba(4, 12, 26, 0.72) 0%,
+    rgba(4, 12, 26, 0.45) 35%,
+    rgba(4, 12, 26, 0.12) 65%,
+    transparent 85%
+  );
+  filter: blur(6px);
+  pointer-events: none;
+  z-index: -1;
+}
+
+.eyebrow {
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--hero-accent);
+  /* No bottom margin — eyebrow sits flush against the description while
+     the headline is collapsed. The headline takes ownership of its own
+     vertical spacing once it animates open. */
+  margin: 0;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.5);
+}
+
+.headline {
+  font-family: var(--font-display, Helvetica, Arial, sans-serif);
+  font-weight: 800;
+  font-size: clamp(40px, 5.4vw, 82px);
+  line-height: 1.08;
+  letter-spacing: -0.02em;
+  text-transform: none;
+  /* Collapsed initial state — zero height + clipped overflow + no margin
+     means the headline takes NO layout space until GSAP reveals it after
+     the ship completes its sweep. Avoids the empty gap between eyebrow
+     and description while the headline is invisible. */
+  margin: 0;
+  height: 0;
+  overflow: hidden;
+  opacity: 0;
+  max-width: 100%;
+  color: #ffffff;
+  text-wrap: balance;
+  text-shadow: 0 6px 28px rgba(0, 0, 0, 0.55);
+}
+
+.subtext {
+  /* No top margin — see .eyebrow note. The headline's bottom margin
+     supplies the gap once revealed. */
+  margin: 0;
+  /* Override the contentBlock's wider width so the description naturally
+     wraps to ~three lines instead of two. */
+  max-width: min(36rem, 92vw);
+  font-size: clamp(17px, 1.55vw, 24px);
+  font-weight: 500;
+  line-height: 1.5;
+  color: rgba(234, 242, 251, 0.95);
+  text-shadow: 0 2px 14px rgba(0, 0, 0, 0.5);
+}
+
+/* "Scroll to know more" cue, sits below the description. Subtle vertical
+   bounce loop prompts the user to keep scrolling so the ship sequence and
+   headline reveal play. */
+.scrollHint {
+  margin-top: 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.55rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: rgba(234, 242, 251, 0.75);
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+}
+
+.scrollHintIcon {
+  display: inline-flex;
+  animation: scrollHintBounce 2.2s ease-in-out infinite;
+}
+
+@keyframes scrollHintBounce {
+  0%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.7;
+  }
+  50% {
+    transform: translateY(6px);
+    opacity: 1;
+  }
+}
+
+/* Wraps ship + wake so the ripples can be positioned relative to the ship,
+   not the whole layer. */
+.shipWrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.ship {
+  display: block;
+  height: auto;
+  width: clamp(720px, 90vw, 1700px);
+  /* sit roughly mid-horizon */
+  margin-top: 4vh;
+  /* Layered shadows simulate the ship's shadow cast on the water:
+       - tight ambient halo right around the hull
+       - directional shadow offset down-right (sun upper-left)
+       - broad soft fall-off into the surrounding water */
+  filter:
+    drop-shadow(0 4px 8px rgba(0, 0, 0, 0.55))
+    drop-shadow(14px 28px 32px rgba(0, 0, 0, 0.55))
+    drop-shadow(24px 48px 70px rgba(0, 0, 0, 0.45));
+  user-select: none;
+  -webkit-user-drag: none;
+  position: relative;
+  z-index: 1;
+}
+
+/* ----------------------------------------------------------
+   Wake system — turbulent foam cluster behind the ship.
+   Stern = LEFT edge of ship (bow points right).
+
+   Approach: stack multiple irregular blurred "puffs" at varied
+   positions/sizes/timings, then run the whole cluster through an
+   SVG feTurbulence + feDisplacementMap filter so the soft ellipses
+   get pushed into chaotic foam shapes instead of clean radial gradients.
+---------------------------------------------------------- */
+
+.svgDefs {
+  position: absolute;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+}
+
+/* Foam wake — anchored to the LEFT of the hero, spans most of viewport
+   width. GSAP scales it from 0 -> 1 rightward as the ship sails away, so
+   the trail "grows" from the starting position toward the ship's current
+   position. Lives at z-index 2 in hero (above overlay, below shipLayer
+   which is z-index 2 too — but DOM order puts ship on top). */
+.foamCluster {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 100%;
+  /* Taller cluster — foam now spreads across more vertical area to
+     match the diffuse foam patches in the background video, rather
+     than reading as a thin concentrated band. */
+  height: clamp(110px, 13vw, 200px);
+  /* transform owned by GSAP (yPercent/scaleX + transformOrigin) */
+  pointer-events: none;
+  z-index: 2;
+  /* `screen` (not `lighten`) blends smoothly with the moving video
+     by additive lightening. With sharp 1px-blur foam, `lighten`'s
+     hard per-pixel max creates punch-through edges; `screen` keeps
+     the blend gentle so sharp bubble forms still feel like part of
+     the water rather than stamped overlay. */
+  mix-blend-mode: screen;
+  filter: url(#foamTurbulence);
+  will-change: transform;
+  opacity: 0.8;
+  /* Mask: radial ellipse anchored on the RIGHT (at the ship's stern).
+     Solid at the right-center, fading to transparent in ALL OTHER
+     directions — left (open water), top, and bottom. This eliminates
+     the visible rectangular boundary the cluster's height creates,
+     so the foam dissolves organically into the water on every side
+     instead of just on the left. */
+  -webkit-mask-image: radial-gradient(
+    ellipse 105% 55% at 100% 50%,
+    black 30%,
+    rgba(0, 0, 0, 0.55) 65%,
+    transparent 100%
+  );
+  mask-image: radial-gradient(
+    ellipse 105% 55% at 100% 50%,
+    black 30%,
+    rgba(0, 0, 0, 0.55) 65%,
+    transparent 100%
+  );
+}
+
+/* Puffs add organic texture variation on top of the smooth base layer.
+   Sharp + slight cyan tint (not pure white) so the foam reads as
+   illuminated sea water rather than overlay smoke. */
+.foamPuff {
+  position: absolute;
+  top: 50%;
+  height: 100%;
+  background: radial-gradient(
+    ellipse at center,
+    rgba(245, 252, 255, 0.8) 0%,
+    rgba(232, 246, 254, 0.55) 35%,
+    rgba(215, 235, 250, 0.22) 65%,
+    transparent 92%
+  );
+  filter: blur(3px);
+  will-change: transform, opacity;
+}
+
+/* Continuous base layer — a single horizontal gradient so the foam reads
+   as one unbroken wave rather than a row of beads. Brightest at the
+   right (where the ship is now), with a STEEP falloff so the visible
+   foam stays concentrated near the stern instead of spreading evenly
+   across the cluster — matches the reference photo's "brief patch of
+   turbulence right behind the ship" look. */
+.foamBase {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to left,
+    rgba(248, 253, 255, 0.4) 0%,
+    rgba(248, 253, 255, 0.72) 12%,
+    rgba(232, 245, 254, 0.55) 25%,
+    rgba(218, 237, 250, 0.32) 45%,
+    rgba(205, 230, 246, 0.12) 70%,
+    transparent 95%
+  );
+  filter: blur(2.5px);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+/* Puffs add organic churn texture ON TOP of the smooth base. Wide,
+   heavily overlapping, and much more blurred so they fuse into the
+   base layer instead of reading as separate ovals. */
+.foamPuffA {
+  right: -5%;
+  width: 40%;
+  border-radius: 60% 40% 55% 45% / 50% 60% 40% 50%;
+  transform: translateY(-50%);
+  animation: foamChurn1 2.8s ease-in-out infinite;
+  /* Dimmer near the ship so the foam blends into the water instead
+     of reading as a defined clump at the stern. */
+  opacity: 0.45;
+}
+.foamPuffB {
+  right: 15%;
+  width: 38%;
+  border-radius: 45% 55% 50% 50% / 55% 45% 50% 50%;
+  transform: translateY(-50%);
+  animation: foamChurn2 3.4s ease-in-out infinite;
+  animation-delay: -0.8s;
+  opacity: 0.8;
+}
+.foamPuffC {
+  right: 32%;
+  width: 38%;
+  border-radius: 55% 45% 40% 60% / 50% 50% 55% 45%;
+  transform: translateY(-50%);
+  animation: foamChurn3 3.1s ease-in-out infinite;
+  animation-delay: -1.5s;
+  opacity: 0.65;
+}
+.foamPuffD {
+  right: 50%;
+  width: 38%;
+  border-radius: 50% 50% 60% 40% / 50% 50% 50% 50%;
+  transform: translateY(-50%);
+  animation: foamChurn1 3.6s ease-in-out infinite;
+  animation-delay: -2.2s;
+  opacity: 0.45;
+}
+.foamPuffE {
+  right: 68%;
+  width: 38%;
+  border-radius: 50% 50% 45% 55% / 50% 50% 50% 50%;
+  transform: translateY(-50%);
+  animation: foamChurn2 4s ease-in-out infinite;
+  animation-delay: -3s;
+  opacity: 0.3;
+}
+
+/* Three churn cycles — each keeps the translateY(-50%) baseline so
+   puffs stay vertically centered on the stern. The scale variation
+   gives the wave-pressure feel without flinging the foam around. */
+@keyframes foamChurn1 {
+  0%, 100% {
+    transform: translateY(-50%) scale(0.95, 1.05);
+    opacity: 0.95;
+  }
+  50% {
+    transform: translateY(-50%) scale(1.12, 0.86);
+    opacity: 1;
+  }
+}
+@keyframes foamChurn2 {
+  0%, 100% {
+    transform: translateY(-50%) scale(1, 1);
+    opacity: 0.85;
+  }
+  35% {
+    transform: translateY(-50%) scale(1.15, 0.82);
+    opacity: 1;
+  }
+  70% {
+    transform: translateY(-50%) scale(0.9, 1.1);
+    opacity: 0.75;
+  }
+}
+@keyframes foamChurn3 {
+  0%, 100% {
+    transform: translateY(-50%) scale(0.92, 1.08);
+    opacity: 0.8;
+  }
+  50% {
+    transform: translateY(-50%) scale(1.2, 0.78);
+    opacity: 1;
+  }
+}
+
+/* Subtle bow splash — soft glow at the front, not a ring. */
+.bowSplash {
+  position: absolute;
+  top: 50%;
+  right: 0;
+  width: clamp(60px, 8vw, 130px);
+  height: clamp(40px, 5vw, 80px);
+  transform: translate(40%, -50%);
+  background: radial-gradient(
+    ellipse at 0% 50%,
+    rgba(255, 255, 255, 0.55) 0%,
+    rgba(235, 245, 255, 0.22) 50%,
+    transparent 85%
+  );
+  filter: blur(6px);
+  border-radius: 55% 45% 60% 40% / 50% 50% 55% 45%;
+  pointer-events: none;
+  z-index: 0;
+  animation: foamChurn1 2.8s ease-in-out infinite;
+  animation-delay: -0.8s;
+  mix-blend-mode: screen;
+}
+
+@media (min-width: 768px) {
+  .ship {
+    margin-top: 2vh;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .video,
+  .shipLayer {
+    transform: none !important;
+  }
+}
