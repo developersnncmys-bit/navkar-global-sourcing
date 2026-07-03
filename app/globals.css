@@ -84,16 +84,6 @@ body {
   color: var(--ink);
 }
 
-/* Home page palette preview — bright ocean blue accent.
-   Scoped via `.home-accent` on the home page's root wrapper only, so
-   the rest of the site keeps its deeper base blue. If approved,
-   promote these values to :root and remove this block + the wrapper
-   class. */
-.home-accent {
-  --accent: #0ea5e9;           /* bright ocean blue — sky-500, vivid */
-  --accent-soft: #38bdf8;      /* brighter sky-400 highlight */
-}
-
 /* Dark section helper — invert tokens within a subtree */
 .dark-section {
   background: var(--espresso);
