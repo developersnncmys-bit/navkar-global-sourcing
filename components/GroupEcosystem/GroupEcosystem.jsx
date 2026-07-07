@@ -1,441 +1,274 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useRef } from "react";
 import { useGSAP } from "@gsap/react";
 import { gsap, ScrollTrigger } from "@/lib/gsap";
-import { services, plans, company } from "@/lib/content";
-import styles from "./GroupEcosystem.module.css";
+import { plans } from "@/lib/content";
+import { ArrowUpRight, Check, Star } from "lucide-react";
+import { SectionShell } from "@/components/ui";
 
-const heroImage = "/images/fourentities.png";
-
-// One Pexels image per sourcing plan, matched to the storyline of each
-// tile. Plans render in DOM order so the index here maps directly to
-// panel #01–#04. Chosen to read as literal for the pointer list on
-// each card — the storyline reads at a glance from the image.
-//   0 → Basic       — "if you already have your supplier" → business
-//                    handshake over a desk with docs (existing partner
-//                    + payment / contracts work)
-//   1 → Pro         — "if you don't have a supplier yet" → smiling
-//                    textile factory workers on the production line
-//                    (supplier sourcing, production follow-up)
-//   2 → Custom      — "bundled solutions, quoted case-to-case" →
-//                    bustling port at sunrise with cargo containers
-//                    (import & logistics, shipment consolidation)
-//   3 → Custom Pro  — "for clients travelling to China themselves" →
-//                    businessman with suitcase walking an airport
-//                    corridor (business travel assistance)
+// Cinematic image per plan, matching the plan's narrative.
 const panelImages = [
-  // Basic — business handshake over documents
   "https://images.pexels.com/photos/8837510/pexels-photo-8837510.jpeg?auto=compress&cs=tinysrgb&w=1200",
-  // Pro — smiling textile factory workers on the production line
   "https://images.pexels.com/photos/31090804/pexels-photo-31090804.jpeg?auto=compress&cs=tinysrgb&w=1200",
-  // Custom — bustling port with colorful cargo containers at sunrise
   "https://images.pexels.com/photos/14020705/pexels-photo-14020705.jpeg?auto=compress&cs=tinysrgb&w=1200",
-  // Custom Pro — elegant businessman walking airport corridor w/ suitcase
   "https://images.pexels.com/photos/6050133/pexels-photo-6050133.jpeg?auto=compress&cs=tinysrgb&w=1200",
 ];
 
+/**
+ * GroupCompaniesSection — client requirement: all four plans must be
+ * visible in the same viewport (no sliders, no accordions, no tabs).
+ * Rendered as a 4-column card rail on desktop that collapses to 2×2
+ * on tablet and a single stack on mobile. Each card carries enough
+ * substance — cinematic image, plan name, tagline, top three
+ * pointers, CTA — to stand on its own without opening a detail page,
+ * while the featured "Most enquired" plan gets an accent border and a
+ * ribbon badge to steer the eye.
+ * A dark overlay dissolves as the section reaches the viewport top
+ * so the seam from the dark ProductCategories marquee above isn't a
+ * hard black-to-white cut.
+ */
 export function GroupCompaniesSection() {
   const rootRef = useRef(null);
-  const trackRef = useRef(null);
-  const progressRef = useRef(null);
-  const heroRef = useRef(null);
+  const gridRef = useRef(null);
   const darkOverlayRef = useRef(null);
-  // Which plan's "More details" is currently expanded (only one at a time
-  // so the rail stays visually consistent). null = all panels show pointers.
-  const [expandedPlan, setExpandedPlan] = useState(null);
 
   useGSAP(
     () => {
-      const root = rootRef.current;
-      if (!root) return;
-
-      // Sync hero panel width to the section's actual clientWidth (excludes
-      // the page's vertical scrollbar). Using 100vw in CSS would include
-      // the scrollbar and leak a horizontal page scroll on Windows.
-      const setViewportVar = () => {
-        root.style.setProperty("--viewport-w", root.clientWidth + "px");
-      };
-      setViewportVar();
-      window.addEventListener("resize", setViewportVar);
-
       const reduced =
         typeof window !== "undefined" &&
         window.matchMedia("(prefers-reduced-motion: reduce)").matches;
       if (reduced) {
-        ScrollTrigger.refresh();
-        return () => window.removeEventListener("resize", setViewportVar);
+        if (darkOverlayRef.current)
+          gsap.set(darkOverlayRef.current, { opacity: 0 });
+        return;
       }
 
-      const mm = gsap.matchMedia();
-
-      // Light → dark dissolve at the IntroStatement → GroupCompanies seam.
-      // Dark overlay sits on top of the section while it's still entering
-      // the viewport, then scrubs from opacity 1 → 0 as the section's top
-      // edge climbs from viewport bottom to viewport top. Smooths the
-      // handoff so there's no light empty gap before this dark section
-      // cuts in.
-      mm.add("(min-width: 768px)", () => {
+      if (darkOverlayRef.current) {
+        gsap.set(darkOverlayRef.current, { opacity: 1 });
         gsap.fromTo(
           darkOverlayRef.current,
           { opacity: 1 },
           {
             opacity: 0,
-            ease: "none",
+            ease: "sine.inOut",
             scrollTrigger: {
               trigger: rootRef.current,
-              start: "top bottom",
+              start: "top 20%",
               end: "top top",
-              scrub: true,
+              scrub: 0.8,
               invalidateOnRefresh: true,
             },
           },
         );
-      });
+      }
 
-      // Desktop: pin the section, translate the inner track horizontally.
+      const mm = gsap.matchMedia();
+
       mm.add("(min-width: 768px)", () => {
-        const track = trackRef.current;
-        if (!track || !root) return;
+        const cards = gridRef.current?.querySelectorAll("[data-card]");
+        if (!cards?.length) return;
 
-        const getDistance = () =>
-          Math.max(0, track.scrollWidth - root.clientWidth);
-
-        // START_HOLD_RATIO — pin engages, section stays stationary (no
-        // horizontal slide) for this fraction of total scroll. Lets the
-        // user read the intro hero before the rail starts moving.
-        // HOLD_RATIO — same idea at the end (View All card is fully
-        // visible before the next section reveals).
-        const START_HOLD_RATIO = 0.2;
-        const HOLD_RATIO = 0.9;
-
-        const tl = gsap.timeline({
+        gsap.set(cards, { opacity: 0, y: 28 });
+        const tween = gsap.to(cards, {
+          opacity: 1,
+          y: 0,
+          duration: 0.6,
+          ease: "power3.out",
+          stagger: 0.08,
           scrollTrigger: {
-            trigger: root,
-            start: "top top",
-            end: () =>
-              "+=" + getDistance() * (1 + START_HOLD_RATIO + HOLD_RATIO),
-            pin: true,
-            scrub: 1,
-            anticipatePin: 1,
+            trigger: gridRef.current,
+            start: "top 85%",
+            end: "top 55%",
+            scrub: 0.8,
             invalidateOnRefresh: true,
-            onUpdate: (self) => {
-              if (progressRef.current) {
-                progressRef.current.style.transform = `scaleX(${self.progress})`;
-              }
-              // Flip nav theme based on where the dark hero panel actually
-              // sits relative to the viewport. Dark while the hero still
-              // covers the left half of the viewport; light once it has
-              // mostly slid off.
-              const hero = heroRef.current;
-              if (hero) {
-                const r = hero.getBoundingClientRect();
-                const nextTheme = r.right > window.innerWidth * 0.4 ? "dark" : "light";
-                if (root.dataset.navTheme !== nextTheme) {
-                  root.dataset.navTheme = nextTheme;
-                }
-              }
-            },
           },
         });
 
-        // Pre-hold: section is pinned but the track stays at x=0. User's
-        // first scroll into the section locks the pin; nothing slides yet.
-        tl.to({}, { duration: START_HOLD_RATIO });
-
-        // Track slides leftward through the panel rail.
-        tl.to(track, {
-          x: () => -getDistance(),
-          ease: "none",
-          duration: 1,
-        });
-
-        // End hold — track stays at its end position so View All is
-        // fully visible before the next section starts revealing.
-        tl.to({}, { duration: HOLD_RATIO });
-
-        return () => tl.kill();
+        return () => {
+          tween.scrollTrigger?.kill();
+          tween.kill();
+        };
       });
 
       ScrollTrigger.refresh();
-
-      return () => window.removeEventListener("resize", setViewportVar);
     },
-    { scope: rootRef }
+    { scope: rootRef },
   );
 
   return (
     <section
       ref={rootRef}
-      className={`${styles.root} md:-mt-[100vh] md:z-20`}
-      data-nav-theme="dark"
-      aria-label="Our services"
+      data-nav-theme="light"
+      aria-label="Our sourcing plans"
+      className="relative w-full overflow-hidden bg-background"
     >
-      {/* Dark dissolve overlay — fades 1 → 0 as the section's top edge
-          travels from viewport bottom to viewport top. Smooths the
-          IntroStatement (light) → GroupCompanies (dark) handoff so the
-          dark section bleeds in rather than cutting in after a light gap. */}
+      {/* Dark overlay bridging the seam from the dark ProductCategories
+          marquee above — stays black until the section top nears the
+          viewport top, then dissolves 1 → 0. */}
       <div
         ref={darkOverlayRef}
         aria-hidden="true"
-        style={{
-          position: "absolute",
-          inset: 0,
-          zIndex: 50,
-          background: "#06121f",
-          pointerEvents: "none",
-        }}
+        className="pointer-events-none absolute inset-0 z-40"
+        style={{ background: "#050505" }}
       />
-      <div ref={trackRef} className={styles.track}>
-        {/* ----------------------------------------------------
-            HERO PANEL — full viewport, image fills entire panel,
-            section heading overlaid on top.
-            ---------------------------------------------------- */}
-        <div ref={heroRef} className={styles.hero}>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            className={styles.heroImg}
-            src={heroImage}
-            alt=""
-            aria-hidden="true"
-            decoding="async"
-            loading="lazy"
-          />
-          <div className={styles.heroVignette} aria-hidden="true" />
 
-          <div className={styles.heroFrame}>
-            <div className={styles.heroTop}>
-              <div className={styles.heroBrand}>
-                <span className={styles.heroBrandMark}>NGS</span>
-                <span className={styles.heroBrandLabel}>Global Sourcing</span>
-              </div>
-              <div className={styles.heroTopRight}>
-                <span className={styles.heroEyebrow}>Our Services</span>
-                <p className={styles.heroIntro}>
-                  A full-spectrum EXIM service line — advisory, licensing,
-                  logistics and compliance — delivered end-to-end by a single
-                  accountable team.
-                </p>
-              </div>
-            </div>
-
-            <div className={styles.heroMid} />
-
-            <div className={styles.heroBottom}>
-              <h2 className={styles.heroTitle}>
-                Four sourcing plans,
-                <span className={styles.heroTitleItalic}>
-                  one accountable team.
-                </span>
-              </h2>
-              <div className={styles.heroMeta}>
-                <span>{String(plans.length).padStart(2, "0")} Plans</span>
-                <span>Est. {company.founded}</span>
-              </div>
-            </div>
-          </div>
-
-          <span className={styles.heroEst} aria-hidden="true">
-            Est. {company.founded}
+      <SectionShell className="pt-20 sm:pt-28 pb-14 sm:pb-20">
+        <div className="mx-auto max-w-[1100px] text-center">
+          <span className="inline-flex items-center gap-2 text-[11px] font-semibold tracking-[0.32em] uppercase text-accent">
+            <span aria-hidden className="h-1.5 w-1.5 rounded-full bg-accent" />
+            Our services
           </span>
+          <h2 className="mt-5 text-[clamp(36px,4.6vw,68px)] font-bold leading-[1.02] tracking-[-0.03em] text-foreground text-balance uppercase">
+            Four ways to source,{" "}
+            <span className="text-accent font-bold">
+              one accountable desk.
+            </span>
+          </h2>
+          <p className="mt-6 text-[15px] sm:text-[17px] text-muted leading-relaxed text-pretty max-w-[640px] mx-auto">
+            Whether you already have a supplier, need us to find one, want a
+            bundled custom package, or plan to fly out yourself — pick the plan
+            that matches where you are in the sourcing journey.
+          </p>
         </div>
 
-        <div className={styles.spacer} aria-hidden="true" />
+        <div
+          ref={gridRef}
+          className="mt-10 sm:mt-14 grid gap-4 sm:gap-5 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4"
+        >
+          {plans.map((plan, i) => (
+            <PlanCard
+              key={plan.slug}
+              index={i + 1}
+              plan={plan}
+              image={panelImages[i] ?? panelImages[0]}
+            />
+          ))}
+        </div>
 
-        {/* ----------------------------------------------------
-            INTRO PANEL — short context card, sourcing-focused
-            ---------------------------------------------------- */}
-        <div className={styles.intro}>
-          <span className={styles.introLabel}>Introduction</span>
-          <h3 className={styles.introHeading}>
-            Four plans, matched to where you are in your sourcing journey.
-          </h3>
-          <p className={styles.introBody}>
-            Whether you already work with a factory or you&rsquo;re looking
-            for one — whether we handle it all remotely or you&rsquo;re
-            travelling to China yourself — pick the plan that fits your
-            starting point. Each card lists the services included; open
-            More details for the full write-up.
-          </p>
-          <a href="/services" className={styles.introLink}>
-            View All Plans →
+        <div className="mt-10 sm:mt-12 flex flex-wrap items-center justify-between gap-4 border-t border-border pt-5">
+          <span className="text-[11px] font-semibold tracking-[0.22em] uppercase text-muted">
+            {String(plans.length).padStart(2, "0")} plans · Basic → Custom Pro
+          </span>
+          <a
+            href="/services"
+            className="inline-flex items-center gap-2 text-[13px] sm:text-[14px] font-semibold text-foreground hover:text-accent transition-colors duration-300"
+          >
+            Compare all plans
+            <ArrowUpRight size={16} strokeWidth={2} />
           </a>
         </div>
-
-        {/* ----------------------------------------------------
-            PLAN PANELS — 4 sourcing plans. Each panel shows
-            plan name + tagline + bullet pointers by default; the
-            "More details" toggle swaps the pointer list for the
-            elaborated write-up in place, so the rail height stays
-            consistent whether details are open or closed.
-            ---------------------------------------------------- */}
-        {plans.map((plan, i) => {
-          const src = panelImages[i % panelImages.length];
-          const num = String(i + 1).padStart(2, "0");
-          const totalStr = String(plans.length).padStart(2, "0");
-          const isExpanded = expandedPlan === plan.slug;
-          const Icon = plan.icon;
-          return (
-            <article
-              key={plan.slug}
-              className={`${styles.panel} ${
-                i % 2 === 1 ? styles.panelTall : ""
-              }`}
-              style={i === plans.length - 1 ? { marginRight: 0 } : undefined}
-            >
-              <div className={styles.panelImg}>
-                <span className={styles.indexBadge}>
-                  <span>{num}</span>
-                  <em>/</em>
-                  <span>{totalStr}</span>
-                </span>
-                {plan.featured && (
-                  <span
-                    style={{
-                      position: "absolute",
-                      top: 16,
-                      right: 16,
-                      zIndex: 2,
-                      padding: "6px 12px",
-                      borderRadius: 999,
-                      background: "var(--accent)",
-                      color: "#fff",
-                      fontSize: 10,
-                      letterSpacing: "0.22em",
-                      textTransform: "uppercase",
-                      fontWeight: 500,
-                    }}
-                  >
-                    Most enquired
-                  </span>
-                )}
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={src} alt="" loading="lazy" decoding="async" />
-              </div>
-              <div className={styles.panelMeta}>
-                <div
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 10,
-                    marginBottom: 2,
-                  }}
-                >
-                  <Icon
-                    style={{
-                      height: 20,
-                      width: 20,
-                      color: "var(--accent)",
-                      flexShrink: 0,
-                    }}
-                    strokeWidth={1.6}
-                  />
-                  <h3 className={styles.panelName}>{plan.name}</h3>
-                </div>
-                <p className={styles.panelRole}>{plan.tagline}</p>
-
-                {/* Pointers ↔ Details — toggled by the button below.
-                    Same visual weight so the panel height stays consistent. */}
-                {isExpanded ? (
-                  <p
-                    style={{
-                      marginTop: 8,
-                      fontSize: 12.5,
-                      color: "var(--muted)",
-                      lineHeight: 1.55,
-                      maxWidth: "34ch",
-                    }}
-                  >
-                    {plan.details}
-                  </p>
-                ) : (
-                  <ul
-                    style={{
-                      margin: "8px 0 0",
-                      padding: 0,
-                      listStyle: "none",
-                      display: "flex",
-                      flexDirection: "column",
-                      gap: 5,
-                      fontSize: 12.5,
-                      color: "var(--muted)",
-                      maxWidth: "34ch",
-                    }}
-                  >
-                    {plan.pointers.slice(0, 7).map((p) => (
-                      <li
-                        key={p}
-                        style={{
-                          display: "flex",
-                          alignItems: "flex-start",
-                          gap: 8,
-                          lineHeight: 1.4,
-                        }}
-                      >
-                        <span
-                          aria-hidden="true"
-                          style={{
-                            marginTop: 6,
-                            width: 4,
-                            height: 4,
-                            borderRadius: 999,
-                            background: "var(--accent)",
-                            flexShrink: 0,
-                          }}
-                        />
-                        <span>{p}</span>
-                      </li>
-                    ))}
-                    {plan.pointers.length > 7 && (
-                      <li
-                        style={{
-                          fontSize: 11.5,
-                          color: "var(--muted-2)",
-                          paddingLeft: 12,
-                        }}
-                      >
-                        +{plan.pointers.length - 7} more in details
-                      </li>
-                    )}
-                  </ul>
-                )}
-
-                <button
-                  type="button"
-                  onClick={() =>
-                    setExpandedPlan(isExpanded ? null : plan.slug)
-                  }
-                  className={styles.viewLink}
-                  style={{
-                    background: "none",
-                    border: "none",
-                    borderBottom: "1px solid currentColor",
-                    padding: "0 0 2px",
-                    cursor: "pointer",
-                    textAlign: "left",
-                    fontFamily: "inherit",
-                    marginTop: 12,
-                  }}
-                >
-                  {isExpanded ? "← Show services" : "More details →"}
-                </button>
-              </div>
-            </article>
-          );
-        })}
-
-      </div>
-
-      {/* Progress overlay (desktop) */}
-      <div className={styles.overlay} aria-hidden="true">
-        <span>Our Plans · {String(plans.length).padStart(2, "0")} Sourcing plans</span>
-        <div className={styles.progressBar}>
-          <div ref={progressRef} className={styles.progressFill} />
-        </div>
-        <span>Scroll to reveal</span>
-      </div>
+      </SectionShell>
     </section>
   );
 }
 
-export default GroupCompaniesSection;
+function PlanCard({ index, plan, image }) {
+  const num = String(index).padStart(2, "0");
+  const featured = plan.featured;
+  return (
+    <a
+      href={`/services#${plan.slug}`}
+      data-card
+      aria-label={`${plan.name} plan — ${plan.tagline}`}
+      className={`group relative block overflow-hidden rounded-3xl aspect-[3/4] transition-all duration-500 hover:-translate-y-1 ${
+        featured
+          ? "ring-2 ring-accent shadow-[0_18px_40px_-16px_rgba(31,135,144,0.55)] hover:shadow-[0_30px_60px_-20px_rgba(31,135,144,0.65)]"
+          : "shadow-[0_10px_28px_-10px_rgba(11,18,32,0.35)] hover:shadow-[0_28px_54px_-18px_rgba(11,18,32,0.5)]"
+      }`}
+    >
+      {/* Full-bleed image fills the whole card. */}
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src={image}
+        alt={`${plan.name} plan`}
+        loading="lazy"
+        decoding="async"
+        className="absolute inset-0 h-full w-full object-cover transition-transform duration-[1200ms] ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.08]"
+      />
+
+      {/* Bottom-heavy neutral-black gradient so overlaid text stays
+          legible on any image tone. Stops are tight to the base so the
+          image tone reads through the top two-thirds of the card
+          without any teal cast from the theme's ink. */}
+      <div
+        aria-hidden
+        className="absolute inset-0"
+        style={{
+          background:
+            "linear-gradient(to top, rgba(0,0,0,0.88) 0%, rgba(0,0,0,0.55) 30%, rgba(0,0,0,0.15) 55%, transparent 75%)",
+        }}
+      />
+
+      <div className="relative z-10 flex h-full flex-col justify-between p-4 sm:p-5">
+        {/* Top row — cream star pill (all cards) + accent 'Most enquired'
+            pill (featured only) sit at opposite corners. */}
+        <div className="flex items-start justify-between gap-2">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-[#FEF8E6] px-2.5 py-1 text-[10px] sm:text-[10.5px] font-semibold tracking-tight text-ink shadow-[0_4px_12px_-4px_rgba(11,18,32,0.35)]">
+            <Star
+              size={11}
+              strokeWidth={0}
+              fill="#F5A623"
+              className="text-[#F5A623]"
+            />
+            <span className="tabular-nums opacity-70">{num}</span>
+            <span className="opacity-40">—</span>
+            {plan.name}
+          </span>
+          {featured && (
+            <span className="inline-flex items-center rounded-full bg-accent/95 backdrop-blur-md px-2.5 py-1 text-[9.5px] font-bold tracking-[0.16em] uppercase text-ivory shadow-[0_4px_14px_-4px_rgba(31,135,144,0.6)]">
+              Most enquired
+            </span>
+          )}
+        </div>
+
+        {/* Bottom content stack — pinned to card base via justify-between. */}
+        <div>
+          <h3
+            className="text-[26px] sm:text-[30px] font-bold leading-[1] tracking-[-0.02em] text-ivory-on-dark"
+            style={{ textShadow: "0 2px 12px rgba(0,0,0,0.5)" }}
+          >
+            {plan.name}
+            <span className="text-accent-soft">.</span>
+          </h3>
+          <p
+            className="mt-1.5 italic text-[12.5px] sm:text-[13px] text-ivory-on-dark/85 leading-snug"
+            style={{ textShadow: "0 2px 8px rgba(0,0,0,0.55)" }}
+          >
+            {plan.tagline}
+          </p>
+
+          <ul className="mt-3 space-y-1">
+            {plan.pointers.slice(0, 3).map((p) => (
+              <li
+                key={p}
+                className="flex items-start gap-2 text-[11.5px] sm:text-[12px] text-ivory-on-dark/95 leading-snug"
+                style={{ textShadow: "0 1px 4px rgba(0,0,0,0.65)" }}
+              >
+                <span
+                  aria-hidden
+                  className="mt-[3px] grid place-items-center h-3 w-3 shrink-0 rounded-full bg-accent-soft text-ink"
+                >
+                  <Check size={8} strokeWidth={3} />
+                </span>
+                <span>{p}</span>
+              </li>
+            ))}
+          </ul>
+
+          <span
+            className="mt-4 inline-flex items-center gap-1.5 text-[11px] font-semibold tracking-[0.14em] uppercase text-ivory-on-dark group-hover:text-accent-soft transition-colors duration-300"
+            style={{ textShadow: "0 1px 4px rgba(0,0,0,0.6)" }}
+          >
+            Read more
+            <ArrowUpRight
+              size={12}
+              strokeWidth={2}
+              className="transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+            />
+          </span>
+        </div>
+      </div>
+    </a>
+  );
+}

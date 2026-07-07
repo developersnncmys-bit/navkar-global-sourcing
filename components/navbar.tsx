@@ -138,14 +138,14 @@ export function Navbar() {
       {/* Sticky mode: full-width solid bar (taller, no gap for content
           bleed). Non-sticky (over hero): floating rounded pill. */}
       <div
-        className={`transition-all duration-500 backdrop-blur-xl ${
+        className={`transition-all duration-500 backdrop-blur-2xl backdrop-saturate-150 ${
           isSticky
             ? showLightBg
-              ? "w-full bg-white/90 border-b border-black/[0.06]"
-              : "w-full bg-ink/85"
+              ? "w-full bg-white/85 border-b border-black/[0.06]"
+              : "w-full bg-black/45"
             : showLightBg
-              ? "mx-auto max-w-[1500px] wide:max-w-[1720px] rounded-full bg-white/80 border border-black/[0.06] shadow-[0_10px_30px_-12px_rgba(11,18,32,0.18)]"
-              : "mx-auto max-w-[1500px] wide:max-w-[1720px] rounded-full bg-ink/50 shadow-[0_10px_30px_-12px_rgba(0,0,0,0.45)]"
+              ? "mx-auto max-w-[1500px] wide:max-w-[1720px] rounded-full bg-white/75 border border-black/[0.06] shadow-[0_10px_30px_-12px_rgba(11,18,32,0.18)]"
+              : "mx-auto max-w-[1500px] wide:max-w-[1720px] rounded-full bg-black/25 shadow-[0_10px_30px_-12px_rgba(0,0,0,0.35)]"
         }`}
         style={
           !showLightBg
@@ -346,7 +346,7 @@ function useGlass(isDark: boolean) {
       }
     : {
         container:
-          "bg-espresso/[0.92] backdrop-blur-2xl backdrop-saturate-150 border border-white/[0.08] text-ivory-on-dark shadow-[0_30px_70px_-20px_rgba(0,0,0,0.55),0_2px_10px_-2px_rgba(0,0,0,0.3)] ring-1 ring-white/[0.03]",
+          "bg-[#0f1a24]/[0.88] backdrop-blur-2xl backdrop-saturate-150 border border-white/[0.08] text-ivory-on-dark shadow-[0_30px_70px_-20px_rgba(0,0,0,0.55),0_2px_10px_-2px_rgba(0,0,0,0.3)] ring-1 ring-white/[0.03]",
         card: "border-transparent bg-transparent hover:bg-white/[0.04]",
         iconBg:
           "bg-white/[0.08] text-ivory-on-dark group-hover:bg-accent group-hover:text-white",

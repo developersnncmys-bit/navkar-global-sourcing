@@ -2,29 +2,35 @@
 
 :root {
   color-scheme: light;
-  /* white default, deep navy for dark bands, ocean-blue accent */
+  /* ============================================================
+     Ocean palette — site-wide brand tokens.
+       Deep Lagoon   #0D7A95   →  brand accent (links, CTA, highlights)
+       Ocean Teal    #169095   →  active states, secondary accent
+       Pine Abyss    #124843   →  deep dark surface (ink / dark section base)
+       Glacier Mist  #D7E9EE   →  light surface, soft washes, hover fills
+     ============================================================ */
   --background: #ffffff;       /* white */
-  --ivory: #f8fafd;            /* near-white, very faint cool tint */
-  --surface: #f1f5fa;           /* light cool surface */
-  --border: #e3e9f1;
-  --border-strong: #c8d4e3;
+  --ivory: #f4f9fb;            /* near-white with a hint of Glacier Mist */
+  --surface: #D7E9EE;          /* Glacier Mist — light cool surface */
+  --border: #cfe2e8;           /* Glacier Mist edge */
+  --border-strong: #a5c6d0;
 
-  --foreground: #0b1220;       /* ink (text on white) */
-  --muted: #4a5568;
-  --muted-2: #7a869a;
+  --foreground: #0F2A2E;       /* deep teal-tinted ink for body text on white */
+  --muted: #345458;            /* muted deep-teal */
+  --muted-2: #6a8a90;           /* muted teal-2 */
 
-  /* Dark section tokens (inverted — deep navy) */
-  --ink: #0b1220;
-  --espresso: #0a1726;
-  --cocoa: #14263d;
-  --border-dark: #1b2e47;
-  --border-dark-strong: #2a4060;
-  --ivory-on-dark: #eaf2fb;
-  --muted-on-dark: #9fb2ca;
-  --muted-on-dark-2: #6a7e98;
+  /* Dark section tokens — Pine Abyss family (inverted) */
+  --ink: #124843;              /* Pine Abyss */
+  --espresso: #0e3b37;          /* slightly deeper Pine Abyss for section bg */
+  --cocoa: #17524d;             /* Pine Abyss surface (cards on dark) */
+  --border-dark: #1e5f59;
+  --border-dark-strong: #2d7a72;
+  --ivory-on-dark: #eaf6f7;
+  --muted-on-dark: #9ac3c7;
+  --muted-on-dark-2: #6f9498;
 
-  --accent: #1f8790;           /* teal — brand accent (site-wide default) */
-  --accent-soft: #5eb4bd;      /* soft teal — same hue, lighter for scrims / hover */
+  --accent: #0D7A95;           /* Deep Lagoon — brand accent (site-wide default) */
+  --accent-soft: #169095;      /* Ocean Teal — brighter, for hovers / secondary */
 }
 
 @theme {
@@ -58,12 +64,11 @@
   --color-accent-soft: var(--accent-soft);
 
   /* Body uses the OS UI sans-serif stack.
-     Headings + display text use Plus Jakarta Sans (loaded in app/layout.tsx
-     via next/font as the CSS variable --font-jakarta) with safe fallbacks. */
+     Headings + display text use the Helvetica/Arial system stack — no web
+     font loaded, so the browser resolves to whatever the OS ships. */
   --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, Ubuntu, Cantarell,
     "Noto Sans", sans-serif;
-  --font-display: var(--font-jakarta), "Plus Jakarta Sans", "Helvetica Neue",
-    Helvetica, Arial, sans-serif;
+  --font-display: "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
 
 * {
@@ -100,9 +105,9 @@ body {
 .text-balance { text-wrap: balance; }
 .text-pretty  { text-wrap: pretty; }
 
-/* Display headings — Plus Jakarta Sans, semi-bold.
+/* Display headings — Helvetica/Arial system stack, semi-bold.
    Class is named `.serif` for legacy reasons across the codebase; it now
-   renders in a sans-serif display style. */
+   renders in a neutral grotesque style. */
 .serif {
   font-family: var(--font-display);
   font-weight: 600;

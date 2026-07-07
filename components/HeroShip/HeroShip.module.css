@@ -150,7 +150,9 @@
 
 .headline {
   font-family: var(--font-display, Helvetica, Arial, sans-serif);
-  font-weight: 800;
+  /* Lighter weight so the display type reads editorial rather than
+     shouty. Kept in the semi-bold range for hierarchy over the video. */
+  font-weight: 600;
   font-size: clamp(40px, 5.4vw, 82px);
   line-height: 1.08;
   letter-spacing: -0.02em;
@@ -173,14 +175,14 @@
   /* No top margin — see .eyebrow note. The headline's bottom margin
      supplies the gap once revealed. */
   margin: 0;
-  /* Override the contentBlock's wider width so the description naturally
-     wraps to ~three lines instead of two. */
-  max-width: min(36rem, 92vw);
+  /* Widened so the description settles into ~2 lines instead of 4. */
+  max-width: min(58rem, 94vw);
   font-size: clamp(17px, 1.55vw, 24px);
   font-weight: 500;
   line-height: 1.5;
   color: rgba(234, 242, 251, 0.95);
   text-shadow: 0 2px 14px rgba(0, 0, 0, 0.5);
+  text-wrap: pretty;
 }
 
 /* "Scroll to know more" cue, sits below the description. Subtle vertical

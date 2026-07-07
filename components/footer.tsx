@@ -69,6 +69,7 @@ export function Footer() {
     <footer
       data-nav-theme="dark"
       className="dark-section relative isolate w-full overflow-hidden"
+      style={{ background: "#0f1a24" }}
     >
       {/* Ambient background accents — soft accent glows. Grid pattern
           removed; purely decorative, sits behind the content. */}

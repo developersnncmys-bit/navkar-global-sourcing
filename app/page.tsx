@@ -13,8 +13,8 @@ export default function Home() {
       <HeroShip />
       <IntroStatement />
       <Worries />
-      <ProductCategories />
       <GroupCompaniesSection />
+      <ProductCategories />
       <NotificationsPreview />
       <ClientsStrip />
       <Testimonials />
