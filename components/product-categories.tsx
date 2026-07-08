@@ -21,32 +21,32 @@ import { ArrowUpRight } from "lucide-react";
  * are always sailing.
  */
 
-const pexels = (id: number, w = 800) =>
+const pexels = (id: number, w = 560) =>
   `https://images.pexels.com/photos/${id}/pexels-photo-${id}.jpeg?auto=compress&cs=tinysrgb&w=${w}`;
 
 const categories: { label: string; src: string; note: string }[] = [
-  // Toys — colorful children's blocks, high contrast on dark bg
-  { label: "Toys", src: pexels(3663116), note: "Bricks, plush & RC" },
-  // Clothing — tailored suits on a rack, editorial fashion tone
-  { label: "Clothing", src: pexels(934070), note: "Apparel & finishing" },
-  // Jewellery — layered gold necklace, editorial jewelry shot
-  { label: "Jewellery", src: pexels(1191531), note: "Fashion & fine stone" },
-  // Furniture — warm modern interior, reads as premium residential
-  { label: "Furniture", src: pexels(1571460), note: "Wood & upholstery" },
-  // Accessories — leather handbag, sculpted product shot
-  { label: "Accessories", src: pexels(1152077), note: "Leather & silver" },
-  // Electronics — camera + headphones on wood, clear tech read
-  { label: "Electronics", src: pexels(356056), note: "Consumer & OEM" },
-  // Stationery — pens & planner on desk, premium paper feel
-  { label: "Stationery", src: pexels(210661), note: "Paper & desk supply" },
-  // Hardware — tools on a workshop bench
-  { label: "Hardware", src: pexels(1409216), note: "Fasteners & tools" },
-  // Machinery — industrial equipment, warehouse tone
-  { label: "Machinery", src: pexels(1267320), note: "Light industrial" },
-  // Home decor — candles / ceramics arrangement
-  { label: "Home decor", src: pexels(1090638), note: "Interiors & gifting" },
-  // Footwear & bags — leather footwear editorial
-  { label: "Footwear & bags", src: pexels(267202), note: "Leather & performance" },
+  // Toys — xylophone + ring-stacking toy on white, clean editorial
+  { label: "Toys", src: pexels(6743166), note: "Bricks, plush & RC" },
+  // Clothing — beige tailored suits on a rack, modern retail editorial
+  { label: "Clothing", src: pexels(18699670), note: "Apparel & finishing" },
+  // Jewellery — gold necklaces on black display stands, luxury editorial
+  { label: "Jewellery", src: pexels(29043373), note: "Fashion & fine stone" },
+  // Furniture — wooden dining table with leather seating, warm modern
+  { label: "Furniture", src: pexels(8082211), note: "Wood & upholstery" },
+  // Accessories — top-down luxury leather wallets, tan & brown tones
+  { label: "Accessories", src: pexels(28028316), note: "Leather & silver" },
+  // Electronics — wireless earbuds + charging case, minimalist monochrome
+  { label: "Electronics", src: pexels(17810093), note: "Consumer & OEM" },
+  // Stationery — mint green notebook + pen, clean flatlay
+  { label: "Stationery", src: pexels(12914430), note: "Paper & desk supply" },
+  // Hardware — steel wrenches on a white backdrop, clean editorial
+  { label: "Hardware", src: pexels(220639), note: "Fasteners & tools" },
+  // Machinery — CNC machine mid-cut with coolant splashing, dynamic
+  { label: "Machinery", src: pexels(8956445), note: "Light industrial" },
+  // Home decor — ceramic vase with decorative branches on wooden tray
+  { label: "Home decor", src: pexels(16411135), note: "Interiors & gifting" },
+  // Footwear & bags — brown leather shoes on wooden table, editorial
+  { label: "Footwear & bags", src: pexels(33039735), note: "Leather & performance" },
 ];
 
 const easeExpo = [0.22, 1, 0.36, 1] as const;
@@ -57,7 +57,6 @@ const laneB = categories.slice(6);
 
 export function ProductCategories() {
   const rootRef = useRef<HTMLElement>(null);
-  const lightOverlayRef = useRef<HTMLDivElement>(null);
   const laneAref = useRef<HTMLDivElement>(null);
   const laneBref = useRef<HTMLDivElement>(null);
   const marqueeWrapRef = useRef<HTMLDivElement>(null);
@@ -67,16 +66,7 @@ export function ProductCategories() {
       const reduced =
         typeof window !== "undefined" &&
         window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-      if (reduced) {
-        gsap.set(lightOverlayRef.current, { opacity: 0 });
-        return;
-      }
-
-      // No entry-overlay tween. Section-above (GroupCompaniesSection)
-      // is light, this section is dark — a clean edge reads better
-      // than a white plate dissolving to reveal dark content, which
-      // washes out the header text mid-transition.
-      gsap.set(lightOverlayRef.current, { opacity: 0 });
+      if (reduced) return;
 
       const mm = gsap.matchMedia();
       mm.add("(min-width: 768px)", () => {
@@ -166,53 +156,37 @@ export function ProductCategories() {
       ref={rootRef}
       data-nav-theme="dark"
       className="relative w-full overflow-hidden -mt-2"
-      style={{ background: "#050505" }}
+      style={{ background: "var(--gradient-zoom)" }}
     >
-      {/* Entry overlay — matches the light GroupCompaniesSection above,
-          then dissolves as the section's top climbs the viewport so the
-          seam reads as a smooth light → dark fade instead of a hard cut. */}
-      <div
-        ref={lightOverlayRef}
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-0 z-50"
-        style={{ background: "#ffffff" }}
-      />
-
-      <div className="relative py-16 sm:py-20 lg:py-24">
+      <div className="relative py-14 sm:py-20 lg:py-24">
         {/* ---------- Header — medium editorial ---------- */}
-        <div className="mx-auto max-w-[1400px] px-6 sm:px-10 lg:px-14 mb-12 sm:mb-16">
+        <div className="mx-auto max-w-[1000px] px-5 sm:px-10 lg:px-14 mb-10 sm:mb-16 text-center">
           <motion.div
             initial={{ opacity: 0, y: 22 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-80px" }}
             transition={{ duration: 0.7, ease: easeExpo }}
-            className="flex flex-col md:flex-row md:items-end md:justify-between gap-6"
+            className="flex flex-col items-center gap-6"
           >
-            <div className="max-w-[640px]">
-              <span className="inline-flex items-center gap-2 text-[10px] font-semibold tracking-[0.28em] uppercase" style={{ color: "#3ab8bd" }}>
-                <span className="h-1.5 w-1.5 rounded-full" style={{ background: "#3ab8bd" }} />
-                What we source
+            <span className="inline-flex items-center gap-2 text-[10px] font-semibold tracking-[0.28em] uppercase text-white">
+              <span className="h-1.5 w-1.5 rounded-full bg-white" />
+              What we source
+            </span>
+            <h2 className="serif font-black whitespace-nowrap text-[clamp(24px,5vw,68px)] leading-[0.95] tracking-[-0.045em] text-white [text-shadow:0_4px_28px_rgba(9,24,55,0.45)]">
+              Categories,{" "}
+              <span className="serif font-black text-white/95">
+                we cater to.
               </span>
-              <h2 className="serif font-black mt-4 text-[clamp(30px,3.8vw,52px)] leading-[1] tracking-[-0.02em] text-white text-balance uppercase">
-                Categories,{" "}
-                <span className="serif-italic" style={{ color: "#3ab8bd" }}>
-                  we cater to.
-                </span>
-              </h2>
-              <p className="mt-4 text-[14px] sm:text-[15px] text-white/60 leading-relaxed text-pretty max-w-[520px]">
-                Eleven sourcing lines in continuous motion — bulk hardware to
-                boutique jewellery, each with its own vetted factory bench.
-                Hover the lanes to slow them down.
-              </p>
-            </div>
-
-            <div className="flex flex-col items-start md:items-end gap-3 shrink-0">
-              <span className="font-mono text-[10px] tracking-[0.22em] uppercase text-white/45">
-                {String(categories.length).padStart(2, "0")} lines · sampled &amp; shipped
-              </span>
+            </h2>
+            <p className="text-[14px] sm:text-[15px] text-white leading-relaxed text-pretty max-w-[560px]">
+              Eleven sourcing lines in continuous motion — bulk hardware to
+              boutique jewellery, each with its own vetted factory bench.
+              Hover the lanes to slow them down.
+            </p>
+            <div className="flex flex-col sm:flex-row items-center gap-4 mt-2">
               <a
                 href="/clientele"
-                className="group inline-flex items-center gap-2 rounded-full border border-white/20 px-4 py-2 text-[12px] font-semibold text-white hover:bg-white hover:text-black transition-colors"
+                className="group inline-flex items-center gap-2 rounded-full border border-white/40 px-5 py-2.5 text-[12px] font-semibold text-white hover:bg-white hover:text-black transition-colors"
               >
                 Browse the full catalog
                 <ArrowUpRight
@@ -221,6 +195,9 @@ export function ProductCategories() {
                   className="transition-transform group-hover:rotate-45"
                 />
               </a>
+              <span className="font-mono text-[10px] tracking-[0.22em] uppercase text-white">
+                {String(categories.length).padStart(2, "0")} lines · sampled &amp; shipped
+              </span>
             </div>
           </motion.div>
         </div>
@@ -231,8 +208,8 @@ export function ProductCategories() {
           className="relative"
           aria-label="Category lanes"
         >
-          {/* Lane A — moving left */}
-          <div className="overflow-hidden">
+          {/* Lane A — moving left on desktop, swipeable on mobile */}
+          <div className="overflow-x-auto md:overflow-hidden no-scrollbar snap-x snap-mandatory md:snap-none scroll-pl-5 md:scroll-pl-0 px-5 md:px-0">
             <div
               ref={laneAref}
               className="flex w-max will-change-transform"
@@ -246,9 +223,9 @@ export function ProductCategories() {
                 <div
                   key={`a-${i}`}
                   data-tile
-                  className="shrink-0 mr-4 sm:mr-5 w-[220px] sm:w-[260px] lg:w-[280px]"
+                  className="snap-start md:snap-none shrink-0 mr-3 sm:mr-5 w-[220px] sm:w-[260px] lg:w-[280px]"
                 >
-                  <CategoryTile index={(i % laneA.length) + 1} {...c} />
+                  <CategoryTile {...c} />
                 </div>
               ))}
             </div>
@@ -256,7 +233,7 @@ export function ProductCategories() {
 
           {/* Lane B — moving right, sits below Lane A with a small gap.
               Includes the CTA tile at the end of each set. */}
-          <div className="overflow-hidden mt-4 sm:mt-5">
+          <div className="overflow-x-auto md:overflow-hidden no-scrollbar snap-x snap-mandatory md:snap-none scroll-pl-5 md:scroll-pl-0 px-5 md:px-0 mt-3 sm:mt-5">
             <div
               ref={laneBref}
               className="flex w-max will-change-transform"
@@ -268,9 +245,9 @@ export function ProductCategories() {
                     <div
                       key={`b-${setIndex}-${i}`}
                       data-tile
-                      className="shrink-0 mr-4 sm:mr-5 w-[220px] sm:w-[260px] lg:w-[280px]"
+                      className="snap-start md:snap-none shrink-0 mr-3 sm:mr-5 w-[220px] sm:w-[260px] lg:w-[280px]"
                     >
-                      <CategoryTile index={i + 7} {...c} />
+                      <CategoryTile {...c} />
                     </div>
                   ))}
                 </div>
@@ -284,12 +261,10 @@ export function ProductCategories() {
 }
 
 function CategoryTile({
-  index,
   label,
   src,
   note,
 }: {
-  index: number;
   label: string;
   src: string;
   note: string;
@@ -297,68 +272,44 @@ function CategoryTile({
   return (
     <a
       href="/clientele"
-      className="group relative block overflow-hidden rounded-xl aspect-[4/5] transition-shadow duration-500"
-      style={{
-        background: "#0a0a0a",
-      }}
+      className="group relative block aspect-square overflow-hidden rounded-[28px] shadow-[0_12px_32px_-14px_rgba(9,24,55,0.5),0_3px_8px_-3px_rgba(9,24,55,0.3)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_20px_44px_-16px_rgba(9,24,55,0.6),0_5px_12px_-3px_rgba(9,24,55,0.35)]"
       aria-label={`${label} — ${note}`}
     >
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src={src}
         alt=""
-        loading="lazy"
+        loading="eager"
         decoding="async"
-        className="absolute inset-0 h-full w-full object-cover transition-transform duration-[900ms] ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.08]"
+        fetchPriority="high"
+        className="absolute inset-0 h-full w-full object-cover transition-transform duration-[600ms] ease-[cubic-bezier(0.23,1,0.32,1)] group-hover:scale-[1.05]"
       />
 
-      {/* Webflow-style inset vignette — a soft dark inner shadow around
-          the image edges so each tile reads as recessed into the dark
-          surface. Multi-layer: hairline top highlight, deep inner
-          vignette on all sides, hairline outer border. */}
-      <span
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-0 rounded-xl z-[2]"
-        style={{
-          boxShadow: [
-            "inset 0 1px 0 rgba(255,255,255,0.08)",
-            "inset 0 0 0 1px rgba(255,255,255,0.04)",
-            "inset 0 -30px 60px -20px rgba(0,0,0,0.55)",
-            "inset 0 30px 60px -30px rgba(0,0,0,0.35)",
-            "inset 20px 0 40px -30px rgba(0,0,0,0.35)",
-            "inset -20px 0 40px -30px rgba(0,0,0,0.35)",
-          ].join(", "),
-        }}
-      />
-
-      {/* Bottom scrim so the label reads over any image tone. Sits
-          above the inset shadow. */}
+      {/* Dark gradient overlay — anchors the text and gives contrast
+          against varied image content. Deeper near the bottom, fades to
+          transparent by the top third so the image reads clearly. */}
       <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-0 z-[3] bg-gradient-to-t from-black/85 via-black/25 to-transparent"
+        aria-hidden
+        className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/45 to-transparent"
       />
-      {/* Number badge — top-left glass pill. */}
-      <span
-        aria-hidden="true"
-        className="absolute top-2.5 left-2.5 z-[4] rounded-full bg-white/85 backdrop-blur-sm px-2 py-0.5 font-mono text-[10px] tracking-[0.16em] text-black"
-      >
-        {String(index).padStart(2, "0")}
-      </span>
-      {/* Label — reveals note on hover. */}
-      <div className="absolute inset-x-0 bottom-0 z-[4] p-3 sm:p-4 transition-transform duration-500 ease-out group-hover:-translate-y-0.5">
-        <span className="serif text-white text-[15px] sm:text-[17px] font-bold tracking-[-0.01em] leading-[1.1] block">
+
+      {/* Inner light-rim + top-highlight — reproduces Zoom's card feel
+          where the tile edge catches ambient light. Sits above the image
+          and overlay so the highlight always reads on the border. */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 rounded-[28px] ring-1 ring-inset ring-white/20 shadow-[inset_0_1px_0_rgba(255,255,255,0.35),inset_0_-1px_0_rgba(255,255,255,0.06)]"
+      />
+
+      {/* Title + note sit inside the image at the bottom. */}
+      <div className="absolute inset-x-0 bottom-0 p-5 text-white">
+        <h3 className="serif text-[18px] font-semibold leading-[1.2] tracking-[-0.01em]">
           {label}
-        </span>
-        <span className="mt-0.5 block text-[10px] font-medium text-white/70 tracking-wide opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+        </h3>
+        <p className="mt-1 text-[12.5px] leading-[1.35] text-white/80">
           {note}
-        </span>
+        </p>
       </div>
-      {/* Ocean Teal corner accent on hover. */}
-      <span
-        aria-hidden="true"
-        className="pointer-events-none absolute bottom-0 left-0 z-[4] h-[3px] w-0 group-hover:w-full transition-[width] duration-700 ease-out"
-        style={{ background: "#3ab8bd" }}
-      />
     </a>
   );
 }

@@ -58,28 +58,13 @@ export function AboutValues() {
         if (cells?.length) gsap.set(cells, { opacity: 0.15, y: 18 });
         if (lines?.length) gsap.set(lines, { scaleX: 0 });
 
-        // Pin the section once it fully lands at the top of the viewport.
-        // Holds for +=350% — 100% for the scrubbed reveal + 250% dwell so
-        // the reader has time to take in the four principles before the
-        // next section (AboutGroupCompanies) slides up over it.
-        ScrollTrigger.create({
-          trigger: rootRef.current,
-          start: "top top",
-          end: "+=350%",
-          pin: true,
-          pinSpacing: true,
-          anticipatePin: 1,
-          invalidateOnRefresh: true,
-        });
-
-        // Reveal timeline scrubs across only the first 100% of the pin
-        // so the grid is fully lit by the time the dwell starts.
+        // Reveal timeline — fires once when the section enters view.
+        // Non-scrubbed because there's no pin to anchor a scrub window.
         const tl = gsap.timeline({
           scrollTrigger: {
             trigger: rootRef.current,
-            start: "top top",
-            end: "+=100%",
-            scrub: 0.8,
+            start: "top 75%",
+            toggleActions: "play none none reverse",
             invalidateOnRefresh: true,
           },
         });
@@ -87,7 +72,7 @@ export function AboutValues() {
         if (introRef.current) {
           tl.to(
             introRef.current,
-            { opacity: 1, y: 0, ease: "none", duration: 0.25 },
+            { opacity: 1, y: 0, ease: "power2.out", duration: 0.6 },
             0,
           );
         }
@@ -97,11 +82,11 @@ export function AboutValues() {
             {
               opacity: 1,
               y: 0,
-              ease: "power1.out",
-              stagger: { each: 0.1, from: "start" },
-              duration: 0.35,
+              ease: "power2.out",
+              stagger: { each: 0.12, from: "start" },
+              duration: 0.6,
             },
-            0.22,
+            0.3,
           );
         }
         if (lines?.length) {
@@ -110,10 +95,10 @@ export function AboutValues() {
             {
               scaleX: 1,
               ease: "power2.out",
-              stagger: { each: 0.1, from: "start" },
-              duration: 0.4,
+              stagger: { each: 0.12, from: "start" },
+              duration: 0.6,
             },
-            0.25,
+            0.4,
           );
         }
 
@@ -142,7 +127,7 @@ export function AboutValues() {
           <Eyebrow>What we stand for</Eyebrow>
           <h2 className="serif font-black mt-4 text-[clamp(28px,3.4vw,48px)] leading-[1.05] tracking-[-0.025em] text-foreground text-balance">
             Four principles{" "}
-            <span className="serif-italic text-accent font-black whitespace-nowrap">
+            <span className="serif-italic text-accent font-black sm:whitespace-nowrap">
               that shape the practice.
             </span>
           </h2>

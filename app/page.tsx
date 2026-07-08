@@ -15,7 +15,7 @@ export default function Home() {
       <Worries />
       <GroupCompaniesSection />
       <ProductCategories />
-      <NotificationsPreview />
+      {/* <NotificationsPreview /> */}
       <ClientsStrip />
       <Testimonials />
     </>

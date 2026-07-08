@@ -154,7 +154,7 @@ export function AboutCertifications() {
             same visual weight for calmer scanning. */}
         <div
           ref={gridRef}
-          className="mt-12 sm:mt-14 grid gap-4 sm:grid-cols-2 xl:grid-cols-4"
+          className="mt-10 sm:mt-14 grid gap-3 sm:gap-4 sm:grid-cols-2 xl:grid-cols-4"
         >
           {certifications.map((cert, i) => {
             const isMembership = cert.kind === "Membership";
@@ -164,7 +164,7 @@ export function AboutCertifications() {
               <article
                 key={cert.slug}
                 data-cert-card
-                className="group relative flex flex-col rounded-2xl border border-border bg-ivory p-6 transition-all duration-500 hover:-translate-y-1 hover:border-border-strong hover:shadow-[0_20px_50px_-25px_rgba(11,18,32,0.25)] overflow-hidden"
+                className="group relative flex flex-col rounded-2xl border border-border bg-ivory p-5 sm:p-6 transition-all duration-500 hover:-translate-y-1 hover:border-border-strong hover:shadow-[0_20px_50px_-25px_rgba(11,18,32,0.25)] overflow-hidden"
               >
                 {/* Head — icon plate + numbering */}
                 <div className="flex items-start justify-between">

@@ -10,7 +10,7 @@ export function SectionShell({
 }: ComponentProps<"section"> & { dark?: boolean }) {
   return (
     <section
-      className={`relative px-6 sm:px-10 wide:px-16 ${dark ? "dark-section" : ""} ${className}`}
+      className={`relative px-5 sm:px-10 wide:px-16 ${dark ? "dark-section" : ""} ${className}`}
       data-nav-theme={dark ? "dark" : "light"}
       {...props}
     >
@@ -46,7 +46,7 @@ export function SectionHeading({
     >
       <div className={`lg:col-span-7`}>
         {eyebrow && <Eyebrow>{eyebrow}</Eyebrow>}
-        <h2 className="serif mt-5 text-[clamp(38px,6.5vw,96px)] text-balance">
+        <h2 className="serif mt-4 sm:mt-5 text-[clamp(28px,6.5vw,96px)] leading-[1.05] text-balance">
           {title}
         </h2>
       </div>

@@ -90,141 +90,78 @@ export function ClientsStrip() {
       const mm = gsap.matchMedia();
 
       mm.add("(min-width: 768px)", () => {
-        // Initial state: bars closed, content faint, marquee hidden.
+        // Section is a light AirDoc-style editorial surface — no
+        // letterbox bars, no cinema fade veils. Stage bg is pure white
+        // to match the JSX surface.
         gsap.set([topBarRef.current, bottomBarRef.current], { height: 0 });
-        gsap.set(stageRef.current, { backgroundColor: "#0a1726" }); // matches espresso
+        gsap.set(stageRef.current, { backgroundColor: "#FFFFFF" });
+        gsap.set(fadeOutRef.current, { opacity: 0 });
+        gsap.set(fadeInRef.current, { opacity: 0 });
+
+        // Faint initial states for words / eyebrow / marquee — brighten
+        // on enter via the timeline below.
         if (titleSpans) gsap.set(titleSpans, { opacity: 0.12 });
         if (descSpans) gsap.set(descSpans, { opacity: 0.12 });
         gsap.set(eyebrowRef.current, { opacity: 0, y: 12 });
-        // Marquee is faint but already present from the start so the
-        // bottom of the stage never reads as empty — it gains opacity as
-        // the timeline progresses.
         gsap.set(marqueeRef.current, { opacity: 0.25, y: 0 });
-        // White fade-out overlay starts invisible; scrubs to full white
-        // at the tail of the pin to dissolve the section into the next.
-        gsap.set(fadeOutRef.current, { opacity: 0 });
-        // White fade-IN overlay starts opaque (matching the white
-        // Testimonials section above) and scrubs out as the section
-        // approaches the viewport top, dissolving the dark cinema in.
-        gsap.set(fadeInRef.current, { opacity: 1 });
 
-        // -------------------------------------------------------------
-        // Cinema reveal — tied to PIN ENGAGEMENT (not entry). The section
-        // sits fully white during the climb up the viewport, then the
-        // moment the pin locks at "top top" the bars close, stage darkens
-        // and the white veil clears. Tight 30vh scrub window so it lands
-        // as a "curtain rise on pin," not a slow wash during scroll.
-        // -------------------------------------------------------------
-        const entrySTConfig = {
-          trigger: rootRef.current,
-          start: "top top",
-          end: () => "+=" + window.innerHeight * 0.3,
-          scrub: 0.6,
-          invalidateOnRefresh: true,
-        };
-        gsap.fromTo(
-          [topBarRef.current, bottomBarRef.current],
-          { height: 0 },
-          { height: "8vh", ease: "sine.inOut", scrollTrigger: entrySTConfig },
-        );
-        gsap.fromTo(
-          stageRef.current,
-          { backgroundColor: "#0a1726" },
-          {
-            backgroundColor: "#000000",
-            ease: "sine.inOut",
-            scrollTrigger: entrySTConfig,
-          },
-        );
-        gsap.fromTo(
-          fadeInRef.current,
-          { opacity: 1 },
-          { opacity: 0, ease: "sine.inOut", scrollTrigger: entrySTConfig },
-        );
-
-        // -------------------------------------------------------------
-        // Pin + scrubbed word reveal timeline. By the time the pin
-        // engages, the cinema reveal above has already landed, so the
-        // pin timeline starts straight into the content reveals.
-        // -------------------------------------------------------------
+        // On-enter reveal — non-scrubbed, plays once when the section
+        // climbs into view. Same beats as before (eyebrow → title → desc
+        // → marquee) but time-based instead of scroll-scrubbed.
         const tl = gsap.timeline({
           scrollTrigger: {
             trigger: rootRef.current,
-            start: "top top",
-            end: () => "+=" + window.innerHeight * 3.2,
-            pin: true,
-            pinSpacing: true,
-            scrub: 1.2,
-            anticipatePin: 1,
+            start: "top 75%",
+            toggleActions: "play none none reverse",
             invalidateOnRefresh: true,
           },
         });
 
-        // Eyebrow appears the moment the pin engages.
-        tl.to(eyebrowRef.current, {
-          opacity: 1,
-          y: 0,
-          duration: 0.05,
-          ease: "power2.out",
-        });
+        tl.to(
+          eyebrowRef.current,
+          { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" },
+          0,
+        );
 
-        // Title — each word brightens from 0.12 → 1 in sequence.
         if (titleSpans?.length) {
           tl.to(
             titleSpans,
             {
               opacity: 1,
-              duration: 0.4,
-              ease: "none",
-              stagger: { each: 0.4 / titleSpans.length, from: "start" },
+              duration: 0.5,
+              ease: "power2.out",
+              stagger: { each: 0.04, from: "start" },
             },
-            0.08,
+            0.15,
           );
         }
 
-        // Description — same pattern, picks up after the title.
         if (descSpans?.length) {
           tl.to(
             descSpans,
             {
               opacity: 0.85,
-              duration: 0.35,
-              ease: "none",
-              stagger: { each: 0.35 / descSpans.length, from: "start" },
+              duration: 0.4,
+              ease: "power2.out",
+              stagger: { each: 0.015, from: "start" },
             },
-            0.52,
+            0.6,
           );
         }
 
-        // Marquee gains full opacity alongside the description tail so it's
-        // visible during the read, not held back to the end.
         tl.to(
           marqueeRef.current,
-          { opacity: 1, duration: 0.25, ease: "power2.out" },
-          0.55,
-        );
-
-        // Brief quiet beat so the marquee isn't cut off mid-stride before
-        // the fade-to-white kicks in.
-        tl.to({}, { duration: 0.04 });
-
-        // Cinema fade-to-white — short and snappy so the seam into the
-        // Testimonials section feels tight. Previous values (0.1 hold +
-        // 0.6 fade) translated to ~1.6 viewports of empty white before
-        // the next section entered; this collapses that to ~0.4.
-        tl.to(
-          fadeOutRef.current,
-          { opacity: 1, duration: 0.18, ease: "power2.inOut" },
-          ">",
+          { opacity: 1, duration: 0.5, ease: "power2.out" },
+          0.8,
         );
 
         return () => tl.kill();
       });
 
       mm.add("(max-width: 767px)", () => {
-        // No pin, no scrub. Static dark section, all content visible.
+        // No pin, no scrub. Static light section, all content visible.
         gsap.set([topBarRef.current, bottomBarRef.current], { height: 0 });
-        gsap.set(stageRef.current, { backgroundColor: "#000000" });
+        gsap.set(stageRef.current, { backgroundColor: "#FFFFFF" });
         if (titleSpans) gsap.set(titleSpans, { opacity: 1 });
         if (descSpans) gsap.set(descSpans, { opacity: 1 });
         gsap.set(eyebrowRef.current, { opacity: 1, y: 0 });
@@ -245,56 +182,69 @@ export function ClientsStrip() {
   return (
     <section
       ref={rootRef}
-      data-nav-theme="dark"
+      data-nav-theme="light"
       className="relative w-full md:h-screen md:overflow-hidden"
+      style={{ backgroundColor: "#FFFFFF" }}
     >
-      {/* Stage — bg animates from espresso to pure black as we enter */}
+      {/* Stage — soft off-white surface (AirDoc-style light blue-grey). */}
       <div
         ref={stageRef}
         className="relative w-full h-full overflow-hidden"
+        style={{ backgroundColor: "#FFFFFF" }}
       >
-        {/* Cinema letterbox bars */}
+        {/* Letterbox bars — kept in the DOM so refs stay valid, but
+            visually neutralised: match the surface so they blend in,
+            height is driven to 0 via GSAP. */}
         <div
           ref={topBarRef}
           aria-hidden
-          className="absolute inset-x-0 top-0 bg-black z-30 pointer-events-none"
+          className="absolute inset-x-0 top-0 z-30 pointer-events-none"
+          style={{ backgroundColor: "#FFFFFF" }}
         />
         <div
           ref={bottomBarRef}
           aria-hidden
-          className="absolute inset-x-0 bottom-0 bg-black z-30 pointer-events-none"
+          className="absolute inset-x-0 bottom-0 z-30 pointer-events-none"
+          style={{ backgroundColor: "#FFFFFF" }}
         />
 
-        {/* Fade-IN screen — covers the stage on entry so the section
-            dissolves cleanly out of the previous white section. Sits at
-            z-50, above the fade-out, so it always wins during entry. */}
+        {/* Legacy fade veils — kept in DOM for ref stability, hidden. */}
         <div
           ref={fadeInRef}
           aria-hidden
-          className="absolute inset-0 bg-white z-50 pointer-events-none"
+          className="absolute inset-0 z-50 pointer-events-none"
+          style={{ backgroundColor: "#FFFFFF" }}
         />
-
-        {/* Fade-to-white screen — sits above the letterbox bars so the
-            section dissolves cleanly to pure white as the pin tails off. */}
         <div
           ref={fadeOutRef}
           aria-hidden
-          className="absolute inset-0 bg-white z-40 pointer-events-none"
+          className="absolute inset-0 z-40 pointer-events-none"
+          style={{ backgroundColor: "#FFFFFF" }}
         />
 
-        <div className="relative z-10 mx-auto max-w-[1320px] wide:max-w-[1560px] h-full px-6 sm:px-10 wide:px-16 pt-[11vh] pb-[11vh] flex flex-col text-white">
-          {/* Text block — flex-1 keeps it growing into the available room
-              between the two letterbox bars without crowding the marquee. */}
-          <div className="flex-1 min-h-0 flex flex-col justify-center max-w-5xl">
+        <div className="relative z-10 mx-auto max-w-[1320px] wide:max-w-[1560px] h-full px-6 sm:px-10 wide:px-16 pt-[11vh] pb-[11vh] flex flex-col items-center text-[#0e0f1a]">
+          {/* Text block — centered stack, AirDoc pattern: pill chip →
+              big centered heading → centered description. */}
+          <div className="flex-1 min-h-0 flex flex-col items-center justify-center text-center max-w-4xl">
+            {/* Pill-chip eyebrow — small rounded white surface with a
+                soft border + shadow (mirrors AirDoc's "Your health, our
+                mission" chip). Accent dot on the left. */}
             <div ref={eyebrowRef}>
-              <span className="label text-accent eyebrow-dot">
+              <span
+                className="inline-flex items-center gap-2 rounded-full bg-white border border-black/[0.06] px-3.5 py-1.5 text-[12px] font-semibold tracking-tight text-[#0e0f1a] shadow-[0_2px_10px_-4px_rgba(11,18,32,0.12)]"
+              >
+                <span
+                  aria-hidden
+                  className="h-1.5 w-1.5 rounded-full"
+                  style={{ backgroundColor: "#0B5CFF" }}
+                />
                 Our clientele
               </span>
             </div>
 
             <h2
               ref={titleRef}
-              className="serif mt-6 sm:mt-8 text-[clamp(32px,4.5vw,68px)] leading-[1.08] tracking-[-0.02em] font-bold text-white"
+              className="serif mt-6 sm:mt-8 text-[clamp(32px,4.5vw,68px)] leading-[1.08] tracking-[-0.02em] font-bold text-[#0e0f1a] text-balance"
             >
               {titleWords.map((w, i) => (
                 <span
@@ -309,7 +259,7 @@ export function ClientsStrip() {
 
             <p
               ref={descRef}
-              className="mt-6 sm:mt-8 text-[clamp(15px,1.3vw,19px)] leading-[1.65] max-w-3xl text-white"
+              className="mt-6 sm:mt-8 text-[clamp(15px,1.3vw,19px)] leading-[1.65] max-w-2xl text-[#4a5061] text-pretty"
             >
               {descWords.map((w, i) => (
                 <span
@@ -323,18 +273,28 @@ export function ClientsStrip() {
             </p>
           </div>
 
-          {/* Auto-scrolling logo marquee — pinned to the bottom of the stage */}
+          {/* Auto-scrolling logo marquee — centered and full-width. */}
           <div
             ref={marqueeRef}
-            className="relative mt-8 shrink-0 overflow-hidden"
+            className="relative mt-8 shrink-0 overflow-hidden w-full"
           >
+            {/* Edge gradients fade to the surface colour so the marquee
+                fades in/out at the edges instead of hard-cutting. */}
             <div
               aria-hidden
-              className="pointer-events-none absolute inset-y-0 left-0 z-10 w-20 sm:w-32 bg-gradient-to-r from-black to-transparent"
+              className="pointer-events-none absolute inset-y-0 left-0 z-10 w-20 sm:w-32"
+              style={{
+                background:
+                  "linear-gradient(to right, #FFFFFF, rgba(255,255,255,0))",
+              }}
             />
             <div
               aria-hidden
-              className="pointer-events-none absolute inset-y-0 right-0 z-10 w-20 sm:w-32 bg-gradient-to-l from-black to-transparent"
+              className="pointer-events-none absolute inset-y-0 right-0 z-10 w-20 sm:w-32"
+              style={{
+                background:
+                  "linear-gradient(to left, #FFFFFF, rgba(255,255,255,0))",
+              }}
             />
 
             <div
@@ -346,14 +306,16 @@ export function ClientsStrip() {
                   key={`${c.name}-${i}`}
                   className="shrink-0 flex items-center justify-center"
                 >
+                  {/* Logos rendered as full-strength black silhouettes —
+                      unified monochrome strip, no muted opacity. */}
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={c.src}
                     alt={c.name}
                     loading="lazy"
                     decoding="async"
-                    style={{ filter: "brightness(0) invert(1)" }}
-                    className="h-10 sm:h-12 w-auto max-w-[160px] object-contain opacity-80"
+                    style={{ filter: "brightness(0)" }}
+                    className="h-10 sm:h-12 w-auto max-w-[160px] object-contain"
                   />
                 </div>
               ))}

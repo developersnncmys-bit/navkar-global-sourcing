@@ -43,26 +43,13 @@ export function AboutDescription({
         );
         if (bodyWords?.length) gsap.set(bodyWords, { opacity: 0.2 });
 
-        // Pin for +=350%: 150% for word reveal + 200% hold with the
-        // copy fully lit so the reader can dwell on it before the next
-        // section (AboutValues) slides up over the blue.
-        ScrollTrigger.create({
-          trigger: rootRef.current,
-          start: "top top",
-          end: "+=350%",
-          pin: true,
-          pinSpacing: true,
-          anticipatePin: 1,
-          invalidateOnRefresh: true,
-        });
-
-        // Scrubbed word-brighten during the first 150% of the pin.
+        // Reveal — fires once when the section enters view.
+        // Non-scrubbed because there's no pin to anchor a scrub window.
         const tl = gsap.timeline({
           scrollTrigger: {
             trigger: rootRef.current,
-            start: "top top",
-            end: "+=150%",
-            scrub: true,
+            start: "top 75%",
+            toggleActions: "play none none reverse",
             invalidateOnRefresh: true,
           },
         });
@@ -72,9 +59,9 @@ export function AboutDescription({
             bodyWords,
             {
               opacity: 1,
-              ease: "none",
-              stagger: { each: 0.006, from: "start" },
-              duration: 0.03,
+              ease: "power2.out",
+              stagger: { each: 0.008, from: "start" },
+              duration: 0.4,
             },
             0,
           );
@@ -128,14 +115,14 @@ export function AboutDescription({
 
       <SectionShell
         dark
-        className="relative min-h-screen flex flex-col justify-center py-16 sm:py-24"
+        className="relative min-h-screen flex flex-col justify-center py-14 sm:py-24"
         style={{ backgroundColor: "transparent" }}
       >
         <Eyebrow>The story in detail</Eyebrow>
 
         <div
           ref={bodyRef}
-          className="mt-8 sm:mt-10 mx-auto max-w-[1200px] space-y-6 text-[clamp(16px,1.6vw,26px)] leading-[1.4] tracking-[-0.005em] text-ivory-on-dark text-balance"
+          className="mt-6 sm:mt-10 mx-auto max-w-[1200px] space-y-5 sm:space-y-6 text-[clamp(15px,1.6vw,26px)] leading-[1.5] sm:leading-[1.4] tracking-[-0.005em] text-ivory-on-dark text-balance"
         >
           <p>
             {welcome.split(" ").map((w, i) => (

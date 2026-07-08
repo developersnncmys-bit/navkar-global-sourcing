@@ -262,7 +262,7 @@ export function ContactChannels() {
   return (
     <div
       ref={rowRef}
-      className="mx-auto max-w-5xl grid gap-6 sm:grid-cols-3 relative"
+      className="mx-auto max-w-5xl grid gap-2 sm:gap-6 sm:grid-cols-3 relative"
     >
       {/* Hairline vertical dividers between the three cells (desktop). */}
       {channels.map((c, i) => {
@@ -282,7 +282,7 @@ export function ContactChannels() {
           </>
         );
         const commonClass =
-          "group relative flex flex-col items-center text-center px-4 py-8 sm:py-10";
+          "group relative flex flex-col items-center text-center px-4 py-6 sm:py-10";
         return (
           <div key={c.label} data-channel className="relative">
             {i > 0 && (

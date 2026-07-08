@@ -1,9 +1,17 @@
 import type { Metadata } from "next";
+import { Manrope } from "next/font/google";
 import "./globals.css";
 import { Navbar } from "@/components/navbar";
 import { Footer } from "@/components/footer";
+import { BackToTop } from "@/components/back-to-top";
 import { ScrollToTopOnLoad } from "@/components/scroll-to-top-on-load";
 import { company } from "@/lib/content";
+
+const manrope = Manrope({
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-manrope",
+});
 
 export const metadata: Metadata = {
   title: `${company.name} — ${company.tagline}`,
@@ -16,7 +24,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="h-full antialiased">
+    <html lang="en" className={`${manrope.variable} h-full antialiased`}>
       <head>
         {/*
           Warm up the connection to Pexels' image CDN — that's where the
@@ -38,6 +46,7 @@ export default function RootLayout({
         <Navbar />
         <main className="flex-1">{children}</main>
         <Footer />
+        <BackToTop />
       </body>
     </html>
   );

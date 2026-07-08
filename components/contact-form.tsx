@@ -92,8 +92,8 @@ export function ContactForm() {
       </div>
 
       {/* Fields */}
-      <div className="mt-10 sm:mt-12 space-y-7 sm:space-y-8">
-        <div className="grid gap-7 sm:gap-8 sm:grid-cols-2">
+      <div className="mt-8 sm:mt-12 space-y-6 sm:space-y-8">
+        <div className="grid gap-6 sm:gap-8 sm:grid-cols-2">
           <Field
             label="Full name"
             name="name"
@@ -109,7 +109,7 @@ export function ContactForm() {
           />
         </div>
 
-        <div className="grid gap-7 sm:gap-8 sm:grid-cols-2">
+        <div className="grid gap-6 sm:gap-8 sm:grid-cols-2">
           <Field
             label="Work email"
             type="email"
@@ -168,7 +168,7 @@ export function ContactForm() {
       </div>
 
       {/* Submit + fine-print consent */}
-      <div className="mt-12 flex flex-col items-center gap-3">
+      <div className="mt-10 sm:mt-12 flex flex-col items-center gap-3">
         <button
           type="submit"
           className="group relative inline-flex items-center justify-center gap-3 rounded-full bg-ink text-ivory pl-7 pr-2 py-2 text-[13px] font-semibold tracking-tight transition-all duration-500 hover:bg-accent shadow-[0_18px_40px_-18px_rgba(11,18,32,0.55)] hover:shadow-[0_22px_50px_-18px_rgba(29,111,184,0.55)]"

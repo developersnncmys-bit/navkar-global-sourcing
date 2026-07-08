@@ -29,19 +29,19 @@ export function Hero() {
       {/* Top-of-hero spacer to clear floating navbar */}
       <div className="absolute inset-x-0 top-0 h-24 sm:h-28 pointer-events-none" />
 
-      <div className="relative z-[1] mx-auto max-w-[1320px] px-6 sm:px-10 pt-32 sm:pt-40 lg:pt-44 pb-12 sm:pb-20 min-h-[100svh] flex flex-col justify-between">
+      <div className="relative z-[1] mx-auto max-w-[1320px] px-5 sm:px-10 pt-28 sm:pt-40 lg:pt-44 pb-12 sm:pb-20 min-h-[100svh] flex flex-col justify-between">
         {/* Headline block — centered, editorial scale */}
         <div className="flex-1 flex flex-col items-center justify-center text-center">
           <motion.span
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, ease, delay: 0.1 }}
-            className="serif text-[clamp(34px,6vw,84px)] leading-[1.02] block"
+            className="serif text-[clamp(26px,6vw,84px)] leading-[1.02] block"
           >
             {word("The Art of", 0.1)}
           </motion.span>
 
-          <h1 className="serif text-[clamp(56px,11vw,180px)] leading-[0.96] mt-2 sm:mt-3 tracking-[-0.04em]">
+          <h1 className="serif text-[clamp(42px,11vw,180px)] leading-[0.96] mt-2 sm:mt-3 tracking-[-0.03em] sm:tracking-[-0.04em]">
             <span className="block">{word("Considered Trade.", 0.35)}</span>
           </h1>
 
@@ -49,7 +49,7 @@ export function Hero() {
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, ease, delay: 1.0 }}
-            className="mt-8 sm:mt-10 max-w-3xl serif-italic text-[clamp(18px,2.2vw,30px)] text-ivory-on-dark/85"
+            className="mt-6 sm:mt-10 max-w-3xl serif-italic text-[clamp(15px,2.2vw,30px)] text-ivory-on-dark/85"
           >
             A studio for <span className="text-accent font-medium not-italic">Advisory</span>{" "}
             <span className="text-ivory-on-dark/50">|</span>{" "}

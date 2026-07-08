@@ -40,7 +40,6 @@ const engagements = [
 // ────────────────────────────────────────────────────────────────
 export function ClienteleLogos() {
   const rootRef = useRef<HTMLElement>(null);
-  const darkOverlayRef = useRef<HTMLDivElement>(null);
   const introRef = useRef<HTMLDivElement>(null);
   const stripRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
@@ -68,7 +67,6 @@ export function ClienteleLogos() {
       }
 
       if (reduced) {
-        gsap.set(darkOverlayRef.current, { opacity: 0 });
         ScrollTrigger.refresh();
         return () => {
           marqueeTween?.kill();
@@ -77,36 +75,10 @@ export function ClienteleLogos() {
 
       const mm = gsap.matchMedia();
 
-      // Dark → white dissolve, timed to the pin approach. The overlay
-      // (deep-navy, colour-matched to the hero) sits fully opaque
-      // through most of the section's climb up the viewport, then
-      // scrubs 1 → 0 only in the last 40% of the approach — so the
-      // section reads dark until its top edge is close to the viewport
-      // top, then dissolves to the white/ivory beneath right as the
-      // pin engages.
-      mm.add("(min-width: 768px)", () => {
-        gsap.fromTo(
-          darkOverlayRef.current,
-          { opacity: 1 },
-          {
-            opacity: 0,
-            ease: "sine.inOut",
-            scrollTrigger: {
-              trigger: rootRef.current,
-              start: "top 40%",
-              end: "top top",
-              scrub: 0.4,
-              invalidateOnRefresh: true,
-            },
-          },
-        );
-      });
-
-      // Pin the section for +=220% of scroll — first ~150% drives the
-      // scrubbed word-by-word title/body reveal + strip lift, remaining
-      // ~70% is a quiet hold so the marquee has room to breathe and the
-      // next section can begin sliding up over the pin tail. Same
-      // pin/hold vocabulary IntroStatement uses on the home page.
+      // Reveal on entry — words brighten in a staggered rush the moment
+      // the section climbs into view. Non-scrubbed because there's no
+      // pin to anchor the scrub window against; a one-shot enter tween
+      // fits the un-pinned architecture and can't get stuck at 0.15.
       mm.add("(min-width: 768px)", () => {
         const titleWords = introRef.current?.querySelectorAll<HTMLElement>("[data-title-word]");
         const bodyWords = introRef.current?.querySelectorAll<HTMLElement>("[data-body-word]");
@@ -116,22 +88,11 @@ export function ClienteleLogos() {
         gsap.set(stripRef.current, { opacity: 0, y: 24 });
         gsap.set(lineRef.current, { scaleX: 0 });
 
-        ScrollTrigger.create({
-          trigger: rootRef.current,
-          start: "top top",
-          end: "+=220%",
-          pin: true,
-          pinSpacing: true,
-          anticipatePin: 1,
-          invalidateOnRefresh: true,
-        });
-
         const tl = gsap.timeline({
           scrollTrigger: {
             trigger: rootRef.current,
-            start: "top top",
-            end: "+=150%",
-            scrub: true,
+            start: "top 78%",
+            toggleActions: "play none none reverse",
             invalidateOnRefresh: true,
           },
         });
@@ -141,9 +102,9 @@ export function ClienteleLogos() {
             titleWords,
             {
               opacity: 1,
-              ease: "none",
-              stagger: { each: 0.02, from: "start" },
-              duration: 0.08,
+              ease: "power2.out",
+              stagger: { each: 0.03, from: "start" },
+              duration: 0.5,
             },
             0,
           );
@@ -153,23 +114,21 @@ export function ClienteleLogos() {
             bodyWords,
             {
               opacity: 1,
-              ease: "none",
-              stagger: { each: 0.008, from: "start" },
-              duration: 0.05,
+              ease: "power2.out",
+              stagger: { each: 0.012, from: "start" },
+              duration: 0.4,
             },
-            0.3,
+            0.35,
           );
         }
-        tl.to(stripRef.current, { opacity: 1, y: 0, ease: "power2.out", duration: 0.2 }, 0.55);
-        tl.to(lineRef.current, { scaleX: 1, ease: "power2.out", duration: 0.3 }, 0.6);
+        tl.to(stripRef.current, { opacity: 1, y: 0, ease: "power2.out", duration: 0.5 }, 0.7);
+        tl.to(lineRef.current, { scaleX: 1, ease: "power2.out", duration: 0.6 }, 0.75);
       });
 
       mm.add("(max-width: 767px)", () => {
         // No pin, no scrub on mobile — content visible on paint.
-        // Overlay suppressed so the section reads light immediately.
         const titleWords = introRef.current?.querySelectorAll<HTMLElement>("[data-title-word]");
         const bodyWords = introRef.current?.querySelectorAll<HTMLElement>("[data-body-word]");
-        gsap.set(darkOverlayRef.current, { opacity: 0 });
         if (titleWords) gsap.set(titleWords, { opacity: 1 });
         if (bodyWords) gsap.set(bodyWords, { opacity: 1 });
         gsap.set(stripRef.current, { opacity: 1, y: 0 });
@@ -195,15 +154,6 @@ export function ClienteleLogos() {
       data-nav-theme="light"
       className="relative w-full bg-background overflow-hidden md:min-h-screen md:flex md:items-center"
     >
-      {/* Dark bleed overlay — colour-matched to the ClienteleHero's
-          bottom gradient. Scrubs 1 → 0 as the section climbs into
-          view, so the light Logos section dissolves out of the dark
-          hero instead of hard-cutting to white. */}
-      <div
-        ref={darkOverlayRef}
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-0 z-50 bg-[#06121f]"
-      />
       <SectionShell className="py-20 sm:py-24 w-full">
         <div ref={introRef}>
           <Eyebrow>Featured logos</Eyebrow>
@@ -327,63 +277,43 @@ export function ClienteleTestimonialRelationships() {
 
         gsap.set([topBarRef.current, bottomBarRef.current], { height: 0 });
         gsap.set(stageRef.current, { backgroundColor: "#0a1726" });
-        gsap.set(fadeInRef.current, { opacity: 1 });
+        // Cinema staging is now static — bars at final height, stage dark,
+        // no white fade veils. The pin+scrub choreography no longer fits.
+        gsap.set([topBarRef.current, bottomBarRef.current], { height: "7vh" });
+        gsap.set(stageRef.current, { backgroundColor: "#040c1a" });
+        gsap.set(fadeInRef.current, { opacity: 0 });
         gsap.set(fadeOutRef.current, { opacity: 0 });
+
+        // Faint initial states for the on-enter reveal.
         gsap.set(introRef.current, { opacity: 0, y: 12 });
         if (titleSpans?.length) gsap.set(titleSpans, { opacity: 0.1 });
         if (nameRows?.length) gsap.set(nameRows, { opacity: 0.08, y: 12 });
         if (nameLines?.length) gsap.set(nameLines, { scaleX: 0 });
         if (captionRef.current) gsap.set(captionRef.current, { opacity: 0, y: 12 });
 
-        // Cinema reveal on pin engagement.
-        const entryST = {
-          trigger: rootRef.current,
-          start: "top top",
-          end: () => "+=" + window.innerHeight * 0.3,
-          scrub: 0.6,
-          invalidateOnRefresh: true,
-        };
-        gsap.fromTo(
-          [topBarRef.current, bottomBarRef.current],
-          { height: 0 },
-          { height: "7vh", ease: "sine.inOut", scrollTrigger: entryST },
-        );
-        gsap.fromTo(
-          stageRef.current,
-          { backgroundColor: "#0a1726" },
-          { backgroundColor: "#040c1a", ease: "sine.inOut", scrollTrigger: entryST },
-        );
-        gsap.fromTo(
-          fadeInRef.current,
-          { opacity: 1 },
-          { opacity: 0, ease: "sine.inOut", scrollTrigger: entryST },
-        );
-
+        // On-enter reveal — non-scrubbed, plays once when section climbs
+        // into view.
         const tl = gsap.timeline({
           scrollTrigger: {
             trigger: rootRef.current,
-            start: "top top",
-            end: () => "+=" + window.innerHeight * 2.2,
-            pin: true,
-            pinSpacing: true,
-            scrub: 1.2,
-            anticipatePin: 1,
+            start: "top 70%",
+            toggleActions: "play none none reverse",
             invalidateOnRefresh: true,
           },
         });
 
-        tl.to(introRef.current, { opacity: 1, y: 0, ease: "power2.out", duration: 0.05 });
+        tl.to(introRef.current, { opacity: 1, y: 0, ease: "power2.out", duration: 0.5 }, 0);
 
         if (titleSpans?.length) {
           tl.to(
             titleSpans,
             {
               opacity: 1,
-              ease: "none",
-              stagger: { each: 0.4 / titleSpans.length, from: "start" },
-              duration: 0.4,
+              ease: "power2.out",
+              stagger: { each: 0.035, from: "start" },
+              duration: 0.5,
             },
-            0.08,
+            0.2,
           );
         }
 
@@ -394,10 +324,10 @@ export function ClienteleTestimonialRelationships() {
               opacity: 1,
               y: 0,
               ease: "power2.out",
-              stagger: { each: 0.14, from: "start" },
-              duration: 0.35,
+              stagger: { each: 0.12, from: "start" },
+              duration: 0.5,
             },
-            0.55,
+            0.7,
           );
         }
         if (nameLines?.length) {
@@ -406,19 +336,14 @@ export function ClienteleTestimonialRelationships() {
             {
               scaleX: 1,
               ease: "power2.out",
-              stagger: { each: 0.14, from: "start" },
-              duration: 0.4,
+              stagger: { each: 0.12, from: "start" },
+              duration: 0.5,
             },
-            0.6,
+            0.75,
           );
         }
 
-        tl.to(captionRef.current, { opacity: 1, y: 0, ease: "power2.out", duration: 0.15 }, ">-0.05");
-
-        tl.to({}, { duration: 0.15 });
-
-        // Fade to white for a clean handoff into the next light section.
-        tl.to(fadeOutRef.current, { opacity: 1, duration: 0.2, ease: "power2.inOut" }, ">");
+        tl.to(captionRef.current, { opacity: 1, y: 0, ease: "power2.out", duration: 0.5 }, 1.1);
 
         return () => tl.kill();
       });
@@ -458,14 +383,14 @@ export function ClienteleTestimonialRelationships() {
         <div ref={fadeInRef} aria-hidden className="absolute inset-0 bg-white z-50 pointer-events-none" />
         <div ref={fadeOutRef} aria-hidden className="absolute inset-0 bg-white z-40 pointer-events-none" />
 
-        <div className="relative z-10 mx-auto max-w-[1320px] wide:max-w-[1560px] px-6 sm:px-10 wide:px-16 pt-[14vh] pb-[10vh] text-white">
+        <div className="relative z-10 mx-auto max-w-[1320px] wide:max-w-[1560px] px-5 sm:px-10 wide:px-16 pt-[10vh] sm:pt-[14vh] pb-[8vh] sm:pb-[10vh] text-white">
           <div ref={introRef}>
             <span className="label text-accent eyebrow-dot">Testimonial relationships</span>
           </div>
 
           <h2
             ref={titleRef}
-            className="serif mt-6 sm:mt-8 text-[clamp(28px,3.4vw,52px)] leading-[1.1] tracking-[-0.02em] font-bold text-white text-balance max-w-3xl"
+            className="serif mt-5 sm:mt-8 text-[clamp(22px,3.4vw,52px)] leading-[1.15] tracking-[-0.02em] font-bold text-white text-balance max-w-3xl"
           >
             {titleWords.map((w, i) => (
               <span key={i} data-word className="inline-block mr-[0.25em] will-change-[opacity]">
@@ -474,14 +399,14 @@ export function ClienteleTestimonialRelationships() {
             ))}
           </h2>
 
-          <div ref={namesRef} className="mt-10 sm:mt-14">
+          <div ref={namesRef} className="mt-8 sm:mt-14">
             {testimonialClients.map((c, i) => (
               <div key={c} data-name className="relative group">
-                <div className="flex items-baseline justify-between gap-6 py-4 sm:py-5">
-                  <h3 className="serif font-semibold text-[clamp(20px,2.4vw,36px)] leading-[1.15] tracking-[-0.015em] text-white">
+                <div className="flex items-baseline justify-between gap-3 sm:gap-6 py-3 sm:py-5">
+                  <h3 className="serif font-semibold text-[clamp(16px,2.4vw,36px)] leading-[1.2] tracking-[-0.015em] text-white min-w-0 truncate">
                     {c}
                   </h3>
-                  <span className="label text-white/50 tracking-[0.24em] shrink-0">
+                  <span className="label text-white/50 tracking-[0.2em] sm:tracking-[0.24em] shrink-0 text-[9.5px] sm:text-[11px]">
                     {String(i + 1).padStart(2, "0")} / {String(testimonialClients.length).padStart(2, "0")}
                   </span>
                 </div>
@@ -551,37 +476,29 @@ export function ClienteleEngagements() {
         if (cards?.length) gsap.set(cards, { opacity: 0.1, y: 24 });
         if (cardLines?.length) gsap.set(cardLines, { scaleX: 0 });
 
-        ScrollTrigger.create({
-          trigger: rootRef.current,
-          start: "top top",
-          end: "+=220%",
-          pin: true,
-          pinSpacing: true,
-          invalidateOnRefresh: true,
-        });
-
+        // On-enter reveal — non-scrubbed. Fires once when the section
+        // climbs into view.
         const tl = gsap.timeline({
           scrollTrigger: {
             trigger: rootRef.current,
-            start: "top top",
-            end: "+=160%",
-            scrub: true,
+            start: "top 75%",
+            toggleActions: "play none none reverse",
             invalidateOnRefresh: true,
           },
         });
 
-        tl.to(introRef.current, { opacity: 1, y: 0, ease: "none", duration: 0.05 }, 0);
+        tl.to(introRef.current, { opacity: 1, y: 0, ease: "power2.out", duration: 0.5 }, 0);
 
         if (titleSpans?.length) {
           tl.to(
             titleSpans,
             {
               opacity: 1,
-              ease: "none",
-              stagger: { each: 0.02, from: "start" },
-              duration: 0.06,
+              ease: "power2.out",
+              stagger: { each: 0.025, from: "start" },
+              duration: 0.5,
             },
-            0.06,
+            0.2,
           );
         }
 
@@ -590,11 +507,11 @@ export function ClienteleEngagements() {
             bodyWords,
             {
               opacity: 1,
-              ease: "none",
-              stagger: { each: 0.008, from: "start" },
-              duration: 0.04,
+              ease: "power2.out",
+              stagger: { each: 0.012, from: "start" },
+              duration: 0.4,
             },
-            0.28,
+            0.6,
           );
         }
 
@@ -605,10 +522,10 @@ export function ClienteleEngagements() {
               opacity: 1,
               y: 0,
               ease: "power2.out",
-              stagger: { each: 0.09, from: "start" },
-              duration: 0.15,
+              stagger: { each: 0.08, from: "start" },
+              duration: 0.5,
             },
-            0.5,
+            0.9,
           );
         }
         if (cardLines?.length) {
@@ -617,10 +534,10 @@ export function ClienteleEngagements() {
             {
               scaleX: 1,
               ease: "power2.out",
-              stagger: { each: 0.09, from: "start" },
-              duration: 0.18,
+              stagger: { each: 0.08, from: "start" },
+              duration: 0.5,
             },
-            0.55,
+            1.0,
           );
         }
       });

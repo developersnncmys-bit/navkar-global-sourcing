@@ -185,15 +185,21 @@ export default function HeroShip() {
             align-items: flex-end to position this block on the right. */}
         <div className={styles.contentBlock}>
           <span ref={eyebrowRef} className={styles.eyebrow}>
+            <span className={styles.eyebrowDot} aria-hidden />
             Global Sourcing · Advisory · Logistics · Since 2000
           </span>
           <h1 ref={headlineRef} className={styles.headline}>
-            Worldwide sourcing, delivered to you.
+            <span className={styles.headlineLine1}>Worldwide sourcing,</span>
+            <span className={styles.headlineLine2}>
+              <em className={styles.headlineItalic}>delivered</em> to you.
+            </span>
           </h1>
           <p ref={subtextRef} className={styles.subtext}>
-            Sourcing across 11+ product lines, cleared under DGFT and Customs,
-            and moved by our in-house logistics — one accountable desk from
-            supplier search to ship&rsquo;s deck.
+            Sourcing across{" "}
+            <span className={styles.subtextKeyword}>11+ product lines</span>,
+            cleared under <span className={styles.subtextKeyword}>DGFT</span>{" "}
+            and Customs, and moved by our in-house logistics — one accountable
+            desk from supplier search to ship&rsquo;s deck.
           </p>
 
           <div ref={scrollHintRef} className={styles.scrollHint} aria-hidden="true">

@@ -3,34 +3,97 @@
 :root {
   color-scheme: light;
   /* ============================================================
-     Ocean palette — site-wide brand tokens.
-       Deep Lagoon   #0D7A95   →  brand accent (links, CTA, highlights)
-       Ocean Teal    #169095   →  active states, secondary accent
-       Pine Abyss    #124843   →  deep dark surface (ink / dark section base)
-       Glacier Mist  #D7E9EE   →  light surface, soft washes, hover fills
+     Zoom palette — site-wide brand tokens.
+       Zoom Royal    #2E479A   →  brand accent (links, CTA, highlights)
+       Zoom Royal-2  #4059B8   →  active states, secondary accent
+       Zoom Navy     #0D1E44   →  deep dark surface (ink / dark section base)
+       Zoom Mist     #EDF0F9   →  light surface, soft washes, hover fills
      ============================================================ */
   --background: #ffffff;       /* white */
-  --ivory: #f4f9fb;            /* near-white with a hint of Glacier Mist */
-  --surface: #D7E9EE;          /* Glacier Mist — light cool surface */
-  --border: #cfe2e8;           /* Glacier Mist edge */
-  --border-strong: #a5c6d0;
+  --ivory: #F4F6FC;            /* near-white with a hint of Zoom Mist */
+  --surface: #EDF0F9;          /* Zoom Mist — light cool surface */
+  --border: #DDE2EF;           /* Zoom Mist edge */
+  --border-strong: #A8B7E7;    /* Zoom Lavender edge */
 
-  --foreground: #0F2A2E;       /* deep teal-tinted ink for body text on white */
-  --muted: #345458;            /* muted deep-teal */
-  --muted-2: #6a8a90;           /* muted teal-2 */
+  --foreground: #0D1E44;       /* Zoom Navy — deep blue ink for body text on white */
+  --muted: #3A4B7A;            /* muted deep-navy */
+  --muted-2: #6B7CB0;          /* muted periwinkle */
 
-  /* Dark section tokens — Pine Abyss family (inverted) */
-  --ink: #124843;              /* Pine Abyss */
-  --espresso: #0e3b37;          /* slightly deeper Pine Abyss for section bg */
-  --cocoa: #17524d;             /* Pine Abyss surface (cards on dark) */
-  --border-dark: #1e5f59;
-  --border-dark-strong: #2d7a72;
-  --ivory-on-dark: #eaf6f7;
-  --muted-on-dark: #9ac3c7;
-  --muted-on-dark-2: #6f9498;
+  /* Dark section tokens — Zoom Navy family (inverted) */
+  --ink: #0D1E44;              /* Zoom Navy */
+  --espresso: #091837;         /* slightly deeper Zoom Navy for section bg */
+  --cocoa: #182C60;            /* Zoom Navy-2 surface (cards on dark) */
+  --border-dark: #21377A;
+  --border-dark-strong: #2E479A;
+  --ivory-on-dark: #EDF0F9;    /* Zoom Mist */
+  --muted-on-dark: #A8B7E7;    /* Zoom Lavender */
+  --muted-on-dark-2: #7E93DE;  /* Zoom Periwinkle */
 
-  --accent: #0D7A95;           /* Deep Lagoon — brand accent (site-wide default) */
-  --accent-soft: #169095;      /* Ocean Teal — brighter, for hovers / secondary */
+  --accent: #2E479A;           /* Zoom Royal — brand accent (site-wide default) */
+  --accent-soft: #4059B8;      /* Zoom Royal-2 — brighter, for hovers / secondary */
+
+  /* ============================================================
+     Zoom-inspired blue palette — used by ProductCategories and
+     future dark→light royal-blue sections. Ramp runs from deep
+     navy through saturated indigo-royal to a lavender mist, so
+     it fades cleanly into the white page background.
+       navy         → deepest top-of-section anchor
+       navy-2       → early transition
+       royal        → mid-dark royal, headline background
+       royal-2      → saturated peak (matches Zoom homepage mid)
+       indigo       → cooler indigo, sits below the peak
+       periwinkle   → mid-lavender, tile-band tone
+       lavender     → light lavender (Zoom's lower-third look)
+       lavender-soft → very light lavender-mist
+       mist         → near-white with a cool cast
+     ============================================================ */
+  --zoom-navy:          #0D1E44;
+  --zoom-navy-2:        #182C60;
+  --zoom-royal:         #2E479A;
+  --zoom-royal-2:       #4059B8;
+  --zoom-indigo:        #5A73CE;
+  --zoom-periwinkle:    #7E93DE;
+  --zoom-lavender:      #A8B7E7;
+  --zoom-lavender-soft: #CDD5EF;
+  --zoom-mist:          #EDF0F9;
+
+  /* Full section gradient — reproduces zoom.com/products/voip-phone's
+     hero backdrop. Three stacked layers, painted bottom-up:
+       1. Diagonal base (135°): deepest navy top-left → royal bottom-right.
+          Gives the whole frame directional lighting instead of reading
+          as one flat navy fill.
+       2. Radial glow: bright periwinkle-sky light source anchored at the
+          lower-right corner, ellipse sized 130% × 120% so it reaches
+          well past center. Peaks at a light lavender (#B9CCF5) — this
+          is what reads as the "sky-blue bottom-right" in the reference.
+       3. White dissolve at the very bottom for the fade into the next
+          white section.
+     Effect: top-left darkest → mid diagonal warms through royal → the
+     bottom-right glows bright sky-periwinkle before dissolving to white.
+     No hard bands, no flat regions. */
+  --gradient-zoom:
+    /* Alpha-fade approach: dark→indigo ramp overlays a solid-white base,
+       and the ramp itself dissolves to transparent by ~58%. Below that
+       point the only visible color is the pure white base — no lavender
+       intermediates, no blue tint, and no visible transition band
+       because opacity is what's changing, not hue. */
+    linear-gradient(
+      180deg,
+      #071230 0%,
+      #0D1E44 6%,
+      #142457 12%,
+      #1B2E6E 18%,
+      #2E479A 24%,
+      #4059B8 30%,
+      #5A73CE 34%,
+      rgba(90, 115, 206, 0.70) 38%,
+      rgba(90, 115, 206, 0.40) 42%,
+      rgba(90, 115, 206, 0.15) 45%,
+      rgba(90, 115, 206, 0.03) 47%,
+      rgba(90, 115, 206, 0) 49%,
+      rgba(90, 115, 206, 0) 100%
+    ),
+    #FFFFFF;
 }
 
 @theme {
@@ -63,12 +126,23 @@
   --color-accent: var(--accent);
   --color-accent-soft: var(--accent-soft);
 
+  --color-zoom-navy: var(--zoom-navy);
+  --color-zoom-navy-2: var(--zoom-navy-2);
+  --color-zoom-royal: var(--zoom-royal);
+  --color-zoom-royal-2: var(--zoom-royal-2);
+  --color-zoom-indigo: var(--zoom-indigo);
+  --color-zoom-periwinkle: var(--zoom-periwinkle);
+  --color-zoom-lavender: var(--zoom-lavender);
+  --color-zoom-lavender-soft: var(--zoom-lavender-soft);
+  --color-zoom-mist: var(--zoom-mist);
+
   /* Body uses the OS UI sans-serif stack.
-     Headings + display text use the Helvetica/Arial system stack — no web
-     font loaded, so the browser resolves to whatever the OS ships. */
+     Headings + display text use Manrope (loaded via next/font in the root
+     layout as --font-manrope) with Helvetica/Arial as the fallback. */
   --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, Ubuntu, Cantarell,
     "Noto Sans", sans-serif;
-  --font-display: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --font-display: var(--font-manrope), "Helvetica Neue", Helvetica, Arial,
+    sans-serif;
 }
 
 * {

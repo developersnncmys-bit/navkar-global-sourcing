@@ -64,41 +64,23 @@ export function ServicesCategories() {
           });
         }
 
-        // Pin budget: 100vh hold while PlansGrid finishes sliding up, 100vh
-        // reveal, then ~200vh stationary hold before the section unpins and
-        // hands off downstream. Total 400vh.
-        const pin = ScrollTrigger.create({
-          trigger: rootRef.current,
-          start: "top top",
-          end: "+=400%",
-          pin: true,
-          pinSpacing: true,
-          invalidateOnRefresh: true,
-        });
-
-        // Scrubbed reveal — the first 100vh of the pin is a no-op "hold"
-        // so PlansGrid can clear the viewport completely; only then does
-        // the flip cascade fire on the next scroll tick.
+        // On-enter reveal — the flip cascade fires once when the section
+        // climbs into view. Non-scrubbed because there's no pin to anchor
+        // a scrub window against.
         const tl = gsap.timeline({
           scrollTrigger: {
             trigger: rootRef.current,
-            start: "top top",
-            end: "+=200%",
-            scrub: true,
+            start: "top 75%",
+            toggleActions: "play none none reverse",
             invalidateOnRefresh: true,
           },
         });
 
-        // Empty tween occupying the first half of the timeline (0 → 100vh
-        // of scroll). Nothing animates; cards stay at their initial flipped
-        // state while PlansGrid completes its slide-up.
-        tl.to({}, { duration: 1 });
-
         if (introRef.current) {
           tl.to(
             introRef.current,
-            { opacity: 1, y: 0, ease: "none", duration: 0.2 },
-            1,
+            { opacity: 1, y: 0, ease: "power2.out", duration: 0.6 },
+            0,
           );
         }
 
@@ -112,17 +94,16 @@ export function ServicesCategories() {
               rotationX: 0,
               ease: "power3.out",
               stagger: {
-                each: 0.06,
+                each: 0.05,
                 from: "center",
               },
-              duration: 0.5,
+              duration: 0.7,
             },
-            1.18,
+            0.2,
           );
         }
 
         return () => {
-          pin.kill();
           tl.scrollTrigger?.kill();
           tl.kill();
         };
@@ -148,9 +129,9 @@ export function ServicesCategories() {
       >
         <div ref={introRef} className="mx-auto max-w-[900px] text-center">
           <Eyebrow>What we source</Eyebrow>
-          <h2 className="mt-3 text-[clamp(26px,3vw,44px)] font-bold leading-[1.05] tracking-[-0.025em] text-foreground text-balance">
+          <h2 className="serif font-bold mt-3 text-[clamp(22px,3vw,44px)] leading-[1.08] tracking-[-0.02em] text-foreground text-balance">
             Categories{" "}
-            <span className="italic text-accent font-bold whitespace-nowrap">
+            <span className="serif-italic font-bold text-accent sm:whitespace-nowrap">
               we cater to.
             </span>
           </h2>

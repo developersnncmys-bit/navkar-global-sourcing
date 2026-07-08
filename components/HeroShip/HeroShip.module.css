@@ -84,10 +84,11 @@
   will-change: transform;
 }
 
-/* Hero copy: centered block. Inner content block defines the SHARED
-   width so all three text elements line up. Vertical padding reserves
-   breathing room for the floating navbar above and the scroll-hint
-   below, so the centered block doesn't crowd either edge. */
+/* Hero copy: LEFT-aligned editorial block. Content anchors to the left
+   third of the viewport so the ship animation on the right side has room
+   to sail across the frame without colliding with the copy. Vertical
+   padding reserves breathing room for the floating navbar above and the
+   scroll-hint below. */
 .content {
   position: absolute;
   inset: 0;
@@ -101,27 +102,27 @@
   pointer-events: none;
 }
 
-/* Inner block — fixed width, centered. Sized so the headline ("THE ART
-   OF CONSIDERED TRADE") balances into 2 lines ("THE ART OF" / "CONSIDERED
-   TRADE") instead of breaking awkwardly at clamp's max font size. */
+/* Inner block — centered so eyebrow, headline, and description share
+   the same axis. Sized so the two-line headline reads with editorial
+   presence without wrapping awkwardly at large viewports. */
 .contentBlock {
   width: 100%;
-  max-width: min(56rem, 92vw);
+  max-width: min(64rem, 94vw);
   display: flex;
   flex-direction: column;
   align-items: center;
 }
 
-/* Pronounced dark scrim behind the text — soft radial wash centered on
-   the text block. Bumped opacities so the text has a clear backdrop for
-   contrast / legibility, without darkening the whole hero. */
+/* Dark scrim behind the text — soft radial wash anchored to the LEFT
+   side (where the copy sits) instead of the middle. Gives the editorial
+   left-column its own backdrop without dimming the whole hero. */
 .content::before {
   content: "";
   position: absolute;
   left: 50%;
   top: 50%;
-  width: min(960px, 92vw);
-  height: clamp(320px, 42vh, 520px);
+  width: min(1080px, 92vw);
+  height: clamp(360px, 55vh, 620px);
   transform: translate(-50%, -50%);
   background: radial-gradient(
     ellipse at center,
@@ -136,60 +137,96 @@
 }
 
 .eyebrow {
-  font-size: 0.85rem;
-  font-weight: 700;
-  letter-spacing: 0.22em;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.65rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.28em;
   text-transform: uppercase;
   color: var(--hero-accent);
-  /* No bottom margin — eyebrow sits flush against the description while
-     the headline is collapsed. The headline takes ownership of its own
-     vertical spacing once it animates open. */
   margin: 0;
   text-shadow: 0 2px 12px rgba(0, 0, 0, 0.5);
 }
 
+.eyebrowDot {
+  display: block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--hero-accent);
+  box-shadow: 0 0 12px rgba(127, 182, 230, 0.6);
+}
+
 .headline {
   font-family: var(--font-display, Helvetica, Arial, sans-serif);
-  /* Lighter weight so the display type reads editorial rather than
-     shouty. Kept in the semi-bold range for hierarchy over the video. */
-  font-weight: 600;
-  font-size: clamp(40px, 5.4vw, 82px);
-  line-height: 1.08;
-  letter-spacing: -0.02em;
+  font-weight: 500;
+  font-size: clamp(44px, 6.8vw, 108px);
+  line-height: 1;
+  letter-spacing: -0.035em;
   text-transform: none;
-  /* Collapsed initial state — zero height + clipped overflow + no margin
-     means the headline takes NO layout space until GSAP reveals it after
-     the ship completes its sweep. Avoids the empty gap between eyebrow
-     and description while the headline is invisible. */
+  text-align: center;
+  /* Collapsed initial state — zero height until GSAP reveals it. */
   margin: 0;
   height: 0;
   overflow: hidden;
   opacity: 0;
   max-width: 100%;
   color: #ffffff;
-  text-wrap: balance;
   text-shadow: 0 6px 28px rgba(0, 0, 0, 0.55);
 }
 
-.subtext {
-  /* No top margin — see .eyebrow note. The headline's bottom margin
-     supplies the gap once revealed. */
-  margin: 0;
-  /* Widened so the description settles into ~2 lines instead of 4. */
-  max-width: min(58rem, 94vw);
-  font-size: clamp(17px, 1.55vw, 24px);
+/* First line: standard weight, white — sets the anchor. */
+.headlineLine1 {
+  display: block;
   font-weight: 500;
-  line-height: 1.5;
-  color: rgba(234, 242, 251, 0.95);
-  text-shadow: 0 2px 14px rgba(0, 0, 0, 0.5);
-  text-wrap: pretty;
+  color: #ffffff;
 }
 
-/* "Scroll to know more" cue, sits below the description. Subtle vertical
-   bounce loop prompts the user to keep scrolling so the ship sequence and
-   headline reveal play. */
+/* Second line: same size, slight negative indent so the italic word's
+   optical left-edge aligns with line 1. */
+.headlineLine2 {
+  display: block;
+  font-weight: 400;
+  color: rgba(255, 255, 255, 0.92);
+  margin-top: 0.05em;
+}
+
+/* Italic accent word — colored, italic, heavier so it visually
+   punctuates the headline like a serif magazine drop. */
+.headlineItalic {
+  font-style: italic;
+  font-weight: 500;
+  color: var(--hero-accent-soft);
+  padding-right: 0.06em;
+}
+
+.subtext {
+  margin: 0;
+  max-width: min(46rem, 92vw);
+  font-size: clamp(16px, 1.4vw, 21px);
+  font-weight: 400;
+  line-height: 1.55;
+  color: rgba(234, 242, 251, 0.85);
+  text-shadow: 0 2px 14px rgba(0, 0, 0, 0.5);
+  text-wrap: pretty;
+  text-align: center;
+}
+
+/* Keyword accent — picks out the load-bearing phrases in the hero
+   subtext through weight + color only, no underline. Reads as
+   emphasized editorial copy, not UI chrome. */
+.subtextKeyword {
+  color: #ffffff;
+  font-weight: 600;
+  text-shadow: 0 2px 14px rgba(0, 0, 0, 0.5);
+}
+
+/* "Scroll to know more" cue — sits below the description, stacked
+   vertically to match the centered editorial layout. Vertical bounce
+   loop on the chevron prompts the user to keep scrolling. */
 .scrollHint {
-  margin-top: 2rem;
+  margin-top: 2.5rem;
   display: flex;
   flex-direction: column;
   align-items: center;

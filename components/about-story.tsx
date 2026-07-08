@@ -64,21 +64,19 @@ export function AboutStory() {
           trigger: rootRef.current,
           start: "top top",
           end: "+=300%",
-          pin: true,
+          pin: false,
           pinSpacing: true,
           anticipatePin: 1,
           invalidateOnRefresh: true,
         });
 
-        // Reveal timeline covers only the first 100% of the pin so the
-        // heading is fully lit by the time the description begins its
-        // slide-over.
+        // Reveal fires once when the section enters view. Non-scrubbed —
+        // the pin window it used to run against no longer exists.
         const tl = gsap.timeline({
           scrollTrigger: {
             trigger: rootRef.current,
-            start: "top top",
-            end: "+=100%",
-            scrub: true,
+            start: "top 75%",
+            toggleActions: "play none none reverse",
             invalidateOnRefresh: true,
           },
         });
@@ -88,9 +86,9 @@ export function AboutStory() {
             headingWords,
             {
               opacity: 1,
-              ease: "none",
+              ease: "power2.out",
               stagger: { each: 0.03, from: "start" },
-              duration: 0.06,
+              duration: 0.5,
             },
             0,
           );
@@ -110,14 +108,14 @@ export function AboutStory() {
         className="pointer-events-none absolute inset-0 z-50 bg-[#06121f]"
       />
 
-      <SectionShell className="min-h-screen flex flex-col justify-center py-20 sm:py-28 text-center">
+      <SectionShell className="min-h-screen flex flex-col justify-center py-16 sm:py-28 text-center">
         <div className="mx-auto flex justify-center">
           <Eyebrow>Our story</Eyebrow>
         </div>
 
         <h2
           ref={headingRef}
-          className="serif mt-8 sm:mt-10 mx-auto text-[clamp(44px,6.4vw,120px)] leading-[1.02] tracking-[-0.025em] text-balance"
+          className="serif mt-6 sm:mt-10 mx-auto text-[clamp(30px,6.4vw,120px)] leading-[1.05] sm:leading-[1.02] tracking-[-0.02em] sm:tracking-[-0.025em] text-balance"
         >
           {"One accountable ecosystem".split(" ").map((w, i) => (
             <Fragment key={`h1-${i}`}>

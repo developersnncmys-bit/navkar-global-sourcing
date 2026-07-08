@@ -151,11 +151,11 @@ export function PageHero({
         }}
       />
 
-      <div className="relative z-30 px-6 sm:px-10 wide:px-16 pt-32 sm:pt-32 pb-24 sm:pb-32 min-h-screen flex flex-col justify-center">
+      <div className="relative z-30 px-5 sm:px-10 wide:px-16 pt-28 sm:pt-32 pb-20 sm:pb-32 min-h-screen flex flex-col justify-center">
         <div className="mx-auto max-w-[1320px] wide:max-w-[1560px] w-full">
           <h1
             ref={headlineRef}
-            className="serif font-bold mx-auto text-center text-[clamp(34px,4.4vw,72px)] leading-[1.08] text-balance max-w-[1050px] text-ivory-on-dark"
+            className="serif font-bold mx-auto text-center text-[clamp(28px,4.4vw,72px)] leading-[1.08] text-balance max-w-[1050px] text-ivory-on-dark"
           >
             {lines.map((line, li) => (
               <Fragment key={li}>
@@ -177,8 +177,8 @@ export function PageHero({
 
           {(subtitle || meta) && (
             <div
-              className={`grid gap-10 lg:grid-cols-12 lg:items-end ${
-                meta ? "mt-24 sm:mt-32" : "mt-8 sm:mt-10"
+              className={`grid gap-8 sm:gap-10 lg:grid-cols-12 lg:items-end ${
+                meta ? "mt-16 sm:mt-32" : "mt-6 sm:mt-10"
               }`}
             >
               {subtitle && (
@@ -201,7 +201,7 @@ export function PageHero({
                   )}
                   <div
                     ref={subtitleRef}
-                    className={`${eyebrow ? "mt-4" : ""} text-[17px] sm:text-[19px] text-ivory-on-dark/80 leading-relaxed text-pretty`}
+                    className={`${eyebrow ? "mt-3 sm:mt-4" : ""} text-[15.5px] sm:text-[19px] text-ivory-on-dark/80 leading-relaxed text-pretty`}
                   >
                     {subtitle}
                   </div>
@@ -212,14 +212,22 @@ export function PageHero({
                   ref={metaRef}
                   className={`${
                     subtitle ? "lg:col-span-5" : "lg:col-span-12"
-                  } grid grid-cols-${Math.min(meta.length, 4)} gap-4 sm:gap-6`}
+                  } grid gap-4 sm:gap-6 ${
+                    meta.length === 1
+                      ? "grid-cols-1"
+                      : meta.length === 2
+                        ? "grid-cols-2"
+                        : meta.length === 3
+                          ? "grid-cols-3"
+                          : "grid-cols-2 sm:grid-cols-4"
+                  }`}
                 >
                   {meta.map((m) => (
                     <div key={m.label} data-meta className="flex flex-col gap-2">
-                      <span className="serif font-bold text-[clamp(34px,3.2vw,52px)] leading-none text-ivory-on-dark">
+                      <span className="serif font-bold text-[clamp(28px,3.2vw,52px)] leading-none text-ivory-on-dark">
                         {m.value}
                       </span>
-                      <span className="label text-[11px] text-ivory-on-dark/60">
+                      <span className="label text-[10px] sm:text-[11px] text-ivory-on-dark/60">
                         {m.label}
                       </span>
                     </div>

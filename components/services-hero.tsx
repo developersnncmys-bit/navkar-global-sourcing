@@ -130,7 +130,7 @@ export function ServicesHero() {
       </div>
 
       {/* Editorial content */}
-      <div className="relative mx-auto max-w-[1100px] w-full px-6 sm:px-10 pt-40 sm:pt-48 pb-24 sm:pb-32 min-h-svh flex flex-col items-center justify-center text-center">
+      <div className="relative mx-auto max-w-[1100px] w-full px-5 sm:px-10 pt-28 sm:pt-48 pb-20 sm:pb-32 min-h-svh flex flex-col items-center justify-center text-center">
         {/* Text scrim — soft radial dark wash centred on the text block so
             the video reads through the frame but the copy sits on a clean
             backdrop. Blurred edges so it fades organically into the video
@@ -149,7 +149,7 @@ export function ServicesHero() {
 
         <h1
           ref={headlineRef}
-          className="relative serif font-black mt-8 text-[clamp(34px,4.8vw,80px)] leading-[1.05] tracking-[-0.02em] text-balance max-w-[980px] text-white [text-shadow:0_6px_28px_rgba(0,0,0,0.55)]"
+          className="relative serif font-black mt-5 sm:mt-8 text-[clamp(26px,4.8vw,80px)] leading-[1.05] tracking-[-0.02em] text-balance max-w-[980px] text-white [text-shadow:0_6px_28px_rgba(0,0,0,0.55)]"
         >
           {headlineSegments.map((seg, si) => (
             <Fragment key={si}>
@@ -171,7 +171,7 @@ export function ServicesHero() {
 
         <p
           ref={subtextRef}
-          className="relative mt-8 max-w-2xl text-[17px] sm:text-[19px] leading-relaxed text-white [text-shadow:0_2px_12px_rgba(0,0,0,0.5)]"
+          className="relative mt-6 sm:mt-8 max-w-2xl text-[15.5px] sm:text-[19px] leading-relaxed text-white [text-shadow:0_2px_12px_rgba(0,0,0,0.5)]"
         >
           Pick the plan that matches where you are in the sourcing journey —
           whether you already have a supplier in China, need us to find one,

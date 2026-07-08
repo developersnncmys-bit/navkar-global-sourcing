@@ -178,18 +178,18 @@ export function AboutJourney() {
     >
       <SectionShell
         dark
-        className="relative pt-24 sm:pt-32 pb-[110vh]"
+        className="relative pt-20 sm:pt-32 pb-[80vh] sm:pb-[110vh]"
         style={{ backgroundColor: "#06121f" }}
       >
         <div ref={introRef} className="mx-auto max-w-[900px] text-center">
           <Eyebrow>Our journey</Eyebrow>
-          <h2 className="serif font-black mt-4 text-[clamp(30px,3.8vw,56px)] leading-[1.05] tracking-[-0.02em] text-ivory-on-dark text-balance">
+          <h2 className="serif font-black mt-4 text-[clamp(24px,3.8vw,56px)] leading-[1.08] tracking-[-0.02em] text-ivory-on-dark text-balance">
             25 years of{" "}
-            <span className="serif-italic text-accent-soft font-black whitespace-nowrap">
+            <span className="serif-italic text-accent-soft font-black sm:whitespace-nowrap">
               growth, trust &amp; transformation.
             </span>
           </h2>
-          <p className="mt-5 text-[15px] sm:text-[16px] text-ivory-on-dark/70 leading-relaxed text-pretty max-w-[640px] mx-auto">
+          <p className="mt-4 sm:mt-5 text-[14.5px] sm:text-[16px] text-ivory-on-dark/70 leading-relaxed text-pretty max-w-[640px] mx-auto">
             From a small cabin in Mumbai to a four-entity ecosystem serving
             500+ shippers — the milestones that shaped Navkar Global Sourcing.
           </p>

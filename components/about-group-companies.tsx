@@ -46,23 +46,12 @@ export function AboutGroupCompanies() {
         if (cards?.length) gsap.set(cards, { opacity: 0, y: 32 });
         if (lines?.length) gsap.set(lines, { scaleX: 0 });
 
-        // Pin the section for +=200% — 100% reveal + 100% dwell.
-        ScrollTrigger.create({
-          trigger: rootRef.current,
-          start: "top top",
-          end: "+=200%",
-          pin: true,
-          pinSpacing: true,
-          anticipatePin: 1,
-          invalidateOnRefresh: true,
-        });
-
+        // On-enter reveal — non-scrubbed, plays once when section enters.
         const tl = gsap.timeline({
           scrollTrigger: {
             trigger: rootRef.current,
-            start: "top top",
-            end: "+=100%",
-            scrub: 0.8,
+            start: "top 75%",
+            toggleActions: "play none none reverse",
             invalidateOnRefresh: true,
           },
         });
@@ -70,7 +59,7 @@ export function AboutGroupCompanies() {
         if (introRef.current) {
           tl.to(
             introRef.current,
-            { opacity: 1, y: 0, ease: "none", duration: 0.25 },
+            { opacity: 1, y: 0, ease: "power2.out", duration: 0.6 },
             0,
           );
         }
@@ -81,8 +70,8 @@ export function AboutGroupCompanies() {
               opacity: 1,
               y: 0,
               ease: "power2.out",
-              stagger: { each: 0.14, from: "start" },
-              duration: 0.35,
+              stagger: { each: 0.12, from: "start" },
+              duration: 0.6,
             },
             0.2,
           );
@@ -93,10 +82,10 @@ export function AboutGroupCompanies() {
             {
               scaleX: 1,
               ease: "power2.out",
-              stagger: { each: 0.14, from: "start" },
-              duration: 0.4,
+              stagger: { each: 0.12, from: "start" },
+              duration: 0.6,
             },
-            0.28,
+            0.3,
           );
         }
       });
@@ -139,9 +128,9 @@ export function AboutGroupCompanies() {
         className="relative min-h-screen flex flex-col justify-center py-14 sm:py-16">
         <div ref={introRef} className="mx-auto max-w-[900px] text-center">
           <Eyebrow>Group of Companies</Eyebrow>
-          <h2 className="serif font-black mt-3 text-[clamp(26px,3vw,42px)] leading-[1.15] tracking-[-0.005em] text-ivory-on-dark text-balance">
+          <h2 className="serif font-black mt-3 text-[clamp(22px,3vw,42px)] leading-[1.15] tracking-[-0.005em] text-ivory-on-dark text-balance">
             Four specialised entities{" "}
-            <span className="serif-italic text-accent-soft font-black whitespace-nowrap tracking-normal">
+            <span className="serif-italic text-accent-soft font-black sm:whitespace-nowrap tracking-normal">
               under one ecosystem.
             </span>
           </h2>

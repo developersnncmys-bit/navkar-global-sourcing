@@ -133,7 +133,7 @@ export function ClienteleHero() {
         }}
       />
 
-      <div className="relative z-30 px-6 sm:px-10 wide:px-16 pt-32 sm:pt-32 pb-24 sm:pb-32 min-h-screen flex flex-col justify-center">
+      <div className="relative z-30 px-5 sm:px-10 wide:px-16 pt-28 sm:pt-32 pb-20 sm:pb-32 min-h-screen flex flex-col justify-center">
         <div className="mx-auto max-w-[1320px] wide:max-w-[1560px] w-full">
           <span
             ref={eyebrowRef}
@@ -148,7 +148,7 @@ export function ClienteleHero() {
 
           <h1
             ref={headlineRef}
-            className="serif font-bold mt-6 mx-auto text-center text-[clamp(34px,4.4vw,72px)] leading-[1.08] text-balance max-w-[1050px] text-ivory-on-dark"
+            className="serif font-bold mt-4 sm:mt-6 mx-auto text-center text-[clamp(28px,4.4vw,72px)] leading-[1.08] text-balance max-w-[1050px] text-ivory-on-dark"
           >
             <span data-word className="inline-block">500+</span>{" "}
             <span data-word className="inline-block">shippers.</span>
@@ -160,10 +160,10 @@ export function ClienteleHero() {
             <span data-word className="inline-block text-white">MSMEs.</span>
           </h1>
 
-          <div className="mt-10 grid gap-10 lg:grid-cols-12 lg:items-end">
+          <div className="mt-8 sm:mt-10 grid gap-8 sm:gap-10 lg:grid-cols-12 lg:items-end">
             <p
               ref={subtextRef}
-              className="lg:col-span-7 max-w-2xl text-[17px] sm:text-[19px] text-ivory-on-dark/80 leading-relaxed text-pretty"
+              className="lg:col-span-7 max-w-2xl text-[15.5px] sm:text-[19px] text-ivory-on-dark/80 leading-relaxed text-pretty"
             >
               A quiet track record built one relationship at a time — from
               household MNCs to first-time exporters finding their feet.
@@ -171,25 +171,25 @@ export function ClienteleHero() {
 
             <div
               ref={metaRef}
-              className="lg:col-span-5 grid grid-cols-3 gap-4 sm:gap-6 border-t border-white/15 pt-6"
+              className="lg:col-span-5 grid grid-cols-3 gap-3 sm:gap-6 border-t border-white/15 pt-5 sm:pt-6"
             >
-              <div data-meta className="flex flex-col gap-2">
-                <span className="serif font-bold text-[clamp(34px,3.2vw,52px)] leading-none text-ivory-on-dark">
+              <div data-meta className="flex flex-col gap-1.5 sm:gap-2">
+                <span className="serif font-bold text-[clamp(24px,3.2vw,52px)] leading-none text-ivory-on-dark">
                   500+
                 </span>
-                <span className="label text-ivory-on-dark/60">Shippers</span>
+                <span className="label text-[10px] sm:text-[11px] text-ivory-on-dark/60">Shippers</span>
               </div>
-              <div data-meta className="flex flex-col gap-2">
-                <span className="serif font-bold text-[clamp(34px,3.2vw,52px)] leading-none text-ivory-on-dark">
+              <div data-meta className="flex flex-col gap-1.5 sm:gap-2">
+                <span className="serif font-bold text-[clamp(24px,3.2vw,52px)] leading-none text-ivory-on-dark">
                   100+
                 </span>
-                <span className="label text-ivory-on-dark/60">MNCs &amp; MSMEs</span>
+                <span className="label text-[10px] sm:text-[11px] text-ivory-on-dark/60">MNCs &amp; MSMEs</span>
               </div>
-              <div data-meta className="flex flex-col gap-2">
-                <span className="serif font-bold text-[clamp(34px,3.2vw,52px)] leading-none text-ivory-on-dark">
+              <div data-meta className="flex flex-col gap-1.5 sm:gap-2">
+                <span className="serif font-bold text-[clamp(24px,3.2vw,52px)] leading-none text-ivory-on-dark">
                   25y
                 </span>
-                <span className="label text-ivory-on-dark/60">On the record</span>
+                <span className="label text-[10px] sm:text-[11px] text-ivory-on-dark/60">On the record</span>
               </div>
             </div>
           </div>

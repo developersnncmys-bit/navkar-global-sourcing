@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowUpRight, Mail, MapPin, Phone } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
 import { company, groupCompanies, memberships } from "@/lib/content";
 
 function SocialIcon({ name }: { name: "instagram" | "linkedin" | "facebook" | "twitter" }) {
@@ -17,7 +17,7 @@ function SocialIcon({ name }: { name: "instagram" | "linkedin" | "facebook" | "t
     <svg
       viewBox="0 0 24 24"
       fill="currentColor"
-      className="h-4 w-4"
+      className="h-[18px] w-[18px]"
       aria-hidden
     >
       <path d={paths[name]} />
@@ -58,8 +58,8 @@ const quickLinks = [
 ];
 
 const legalLinks = [
-  { href: "#", label: "Privacy Policy" },
-  { href: "#", label: "Terms of Service" },
+  { href: "#", label: "Terms" },
+  { href: "#", label: "Privacy" },
 ];
 
 export function Footer() {
@@ -69,64 +69,108 @@ export function Footer() {
     <footer
       data-nav-theme="dark"
       className="dark-section relative isolate w-full overflow-hidden"
-      style={{ background: "#0f1a24" }}
+      style={{ background: "#0D1E44" }}
     >
-      {/* Ambient background accents — soft accent glows. Grid pattern
-          removed; purely decorative, sits behind the content. */}
+      {/* Subtle radial glow — Zoom-style soft depth near the top. */}
       <div
         aria-hidden
         className="pointer-events-none absolute inset-0 -z-10"
       >
-        <div className="absolute -top-40 left-1/2 h-[520px] w-[1100px] -translate-x-1/2 rounded-full bg-accent/20 blur-[160px] opacity-50" />
-        <div className="absolute bottom-0 right-0 h-[420px] w-[640px] rounded-full bg-accent-soft/15 blur-[140px] opacity-60" />
+        <div
+          className="absolute -top-40 left-1/2 h-[560px] w-[1200px] -translate-x-1/2 rounded-full blur-[160px] opacity-70"
+          style={{ background: "radial-gradient(closest-side, #2E479A 0%, rgba(46,71,154,0) 70%)" }}
+        />
       </div>
 
-      <div className="mx-auto max-w-[1320px] wide:max-w-[1560px] px-6 sm:px-10 wide:px-16 pt-14 sm:pt-20 pb-10">
+      <div className="relative mx-auto max-w-[1320px] wide:max-w-[1560px] px-5 sm:px-10 wide:px-16 pt-14 sm:pt-20 pb-8">
         {/* ----------------------------------------------------------
-            BRAND ROW — wordmark + tagline on the left, CTA on the right.
-            Acts as the visual anchor of the footer.
+            FOOTER TAGLINE — editorial display headline, hero-scale.
             ---------------------------------------------------------- */}
-        <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between border-b border-border-dark pb-10 sm:pb-12">
-          <div className="max-w-xl">
-            <span className="label text-accent eyebrow-dot">
-              Navkar Global Sourcing
+        {/* ----------------------------------------------------------
+            TAGLINE ROW — headline + description on the left,
+            "Begin Enquiry" CTA anchored bottom-right.
+            ---------------------------------------------------------- */}
+        <div className="flex flex-col gap-8 md:flex-row md:items-end md:justify-between mb-14 sm:mb-20">
+          <div className="max-w-[720px]">
+            <span className="inline-flex items-center gap-2 text-[10px] font-semibold tracking-[0.28em] uppercase text-accent-soft">
+              <span className="h-1.5 w-1.5 rounded-full bg-accent-soft" />
+              {company.name}
             </span>
-            <p className="serif mt-6 text-[clamp(28px,3.6vw,46px)] leading-[1.05] tracking-[-0.025em] text-ivory-on-dark">
-              Trade that{" "}
-              <span className="serif-italic text-accent">feels like business</span>
-              <span className="text-ivory-on-dark/40">.</span>
-            </p>
-            <p className="mt-4 text-[15px] sm:text-[16px] text-ivory-on-dark/80 leading-relaxed max-w-md">
+            <h2 className="serif mt-5 text-[clamp(28px,4.4vw,62px)] leading-[1.02] tracking-[-0.02em] text-ivory-on-dark">
+              Trade that feels like business
+              <span className="text-accent-soft">.</span>
+            </h2>
+            <p className="mt-6 text-[14.5px] sm:text-[15.5px] text-ivory-on-dark/75 leading-relaxed max-w-[520px]">
               {company.shortDescription}
             </p>
           </div>
 
           <Link
             href="/contact"
-            className="group inline-flex items-center gap-3 rounded-full bg-ivory text-ink px-6 py-3.5 text-[14px] font-medium hover:bg-accent hover:text-ivory transition shrink-0"
+            className="group inline-flex w-fit items-center gap-3 rounded-full bg-ivory text-ink px-6 py-3.5 text-[14px] font-medium hover:bg-accent-soft hover:text-ivory transition shrink-0"
           >
             Begin Enquiry
-            <span className="grid place-items-center h-7 w-7 rounded-full bg-ink text-ivory group-hover:bg-ivory group-hover:text-accent transition">
+            <span className="grid place-items-center h-7 w-7 rounded-full bg-ink text-ivory group-hover:bg-ivory group-hover:text-accent-soft transition">
               <ArrowUpRight className="h-3.5 w-3.5" strokeWidth={2} />
             </span>
           </Link>
         </div>
 
         {/* ----------------------------------------------------------
-            MAIN GRID — quick links, group companies, contact, social.
+            MAIN GRID — Zoom-style: left contact column + 4 link columns.
             ---------------------------------------------------------- */}
-        <div className="grid gap-x-10 gap-y-10 md:grid-cols-2 lg:grid-cols-12 mt-10 sm:mt-14">
-          {/* Quick links */}
-          <div className="lg:col-span-3 min-w-0">
-            <h3 className="label text-muted-2">Quick links</h3>
-            <ul className="mt-6 flex flex-col gap-3.5">
+        <div className="grid gap-x-8 gap-y-12 md:grid-cols-2 lg:grid-cols-5">
+          {/* Left column: brand, description, "Get in touch" + phone, socials */}
+          <div className="lg:col-span-1 flex flex-col min-w-0">
+            <div>
+              <p className="text-[40px] font-semibold uppercase leading-[0.95] tracking-[-0.02em] text-ivory-on-dark">
+                Navkar
+              </p>
+              <div className="mt-3 flex items-center gap-3">
+                <span className="h-[2px] w-6 bg-accent-soft" aria-hidden />
+                <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-ivory-on-dark/70">
+                  Global Sourcing
+                </p>
+              </div>
+            </div>
+            <p className="mt-10 text-[14px] text-ivory-on-dark/85">
+              Get in touch
+            </p>
+            <a
+              href={`tel:${company.phone.replace(/\s+/g, "")}`}
+              className="mt-2 text-[22px] font-semibold text-ivory-on-dark hover:text-accent transition tracking-tight"
+            >
+              {company.phone}
+            </a>
+
+            <div className="mt-8 flex items-center gap-6">
+              {(["linkedin", "twitter", "instagram", "facebook"] as const).map(
+                (n) => (
+                  <a
+                    key={n}
+                    href="#"
+                    aria-label={n}
+                    className="text-ivory-on-dark/85 hover:text-accent transition"
+                  >
+                    <SocialIcon name={n} />
+                  </a>
+                ),
+              )}
+            </div>
+          </div>
+
+          {/* Quick Links */}
+          <div className="min-w-0">
+            <h3 className="text-[14.5px] font-semibold text-ivory-on-dark">
+              Quick links
+            </h3>
+            <ul className="mt-5 flex flex-col gap-3">
               {quickLinks.map((l) => (
                 <li key={l.label}>
                   <Link
                     href={l.href}
-                    className="group inline-flex items-center gap-2 text-[15px] text-ivory-on-dark/85 hover:text-accent transition"
+                    className="text-[13.5px] text-ivory-on-dark/75 hover:text-accent transition"
                   >
-                    <span className="h-px w-3 bg-current opacity-40 group-hover:w-6 group-hover:opacity-100 transition-all duration-300" />
                     {l.label}
                   </Link>
                 </li>
@@ -134,14 +178,16 @@ export function Footer() {
             </ul>
           </div>
 
-          {/* Group Of Companies */}
-          <div className="lg:col-span-3 min-w-0">
-            <h3 className="label text-muted-2">Group of companies</h3>
-            <ul className="mt-6 flex flex-col gap-4">
+          {/* Group of Companies */}
+          <div className="min-w-0">
+            <h3 className="text-[14.5px] font-semibold text-ivory-on-dark">
+              Group of companies
+            </h3>
+            <ul className="mt-5 flex flex-col gap-3">
               {groupCompanies.map((g) => (
                 <li
                   key={g.name}
-                  className="text-[14.5px] text-ivory-on-dark/85 leading-relaxed"
+                  className="text-[13.5px] text-ivory-on-dark/75 leading-relaxed"
                 >
                   {g.name}
                 </li>
@@ -149,61 +195,45 @@ export function Footer() {
             </ul>
           </div>
 
-          {/* Get in touch */}
-          <div className="lg:col-span-4 min-w-0">
-            <h3 className="label text-muted-2">Get in touch</h3>
-            <div className="mt-6 flex flex-col gap-5">
-              <p className="serif text-[18px] text-ivory-on-dark">
-                {company.name}
+          {/* Contact */}
+          <div className="min-w-0">
+            <h3 className="text-[14.5px] font-semibold text-ivory-on-dark">
+              Contact
+            </h3>
+
+            <div className="mt-5">
+              <p className="text-[12px] uppercase tracking-[0.14em] text-ivory-on-dark/50">
+                Address
               </p>
-              <div className="flex items-start gap-3 text-[14.5px] text-ivory-on-dark/85 leading-relaxed">
-                <MapPin className="h-4 w-4 mt-1 text-accent shrink-0" strokeWidth={1.75} />
-                <span>
-                  12-A Mahendra Industrial Premises,<br />
-                  Sion (East), Mumbai, 400 022
-                </span>
-              </div>
-              <a
-                href={`tel:${company.phone.replace(/\s+/g, "")}`}
-                className="group inline-flex items-center gap-3 text-[14.5px] text-ivory-on-dark/85 hover:text-accent transition"
-              >
-                <Phone className="h-4 w-4 text-accent shrink-0" strokeWidth={1.75} />
-                <span>{company.phone}</span>
-              </a>
+              <p className="mt-2 text-[13.5px] text-ivory-on-dark/75 leading-relaxed">
+                12-A Mahendra Industrial Premises,<br />
+                Sion (East), Mumbai, 400 022
+              </p>
+            </div>
+
+            <div className="mt-5">
+              <p className="text-[12px] uppercase tracking-[0.14em] text-ivory-on-dark/50">
+                Email
+              </p>
               <a
                 href={`mailto:${company.email}`}
-                className="group inline-flex items-center gap-3 text-[14.5px] text-ivory-on-dark/85 hover:text-accent transition break-words"
+                className="mt-2 inline-block text-[13.5px] text-ivory-on-dark/85 hover:text-accent transition break-words"
               >
-                <Mail className="h-4 w-4 text-accent shrink-0" strokeWidth={1.75} />
-                <span>{company.email}</span>
+                {company.email}
               </a>
             </div>
           </div>
 
-          {/* Connect with us + memberships */}
-          <div className="lg:col-span-2 min-w-0">
-            <h3 className="label text-muted-2">Connect</h3>
-            <div className="mt-6 flex flex-wrap items-center gap-2.5">
-              {(["twitter", "linkedin", "instagram", "facebook"] as const).map(
-                (n) => (
-                  <a
-                    key={n}
-                    href="#"
-                    aria-label={n}
-                    className="grid place-items-center h-10 w-10 rounded-full border border-border-dark-strong text-ivory-on-dark/85 hover:text-ink hover:bg-ivory hover:border-ivory transition shrink-0"
-                  >
-                    <SocialIcon name={n} />
-                  </a>
-                ),
-              )}
-            </div>
-
-            <h3 className="label text-muted-2 mt-10">Memberships</h3>
-            <ul className="mt-4 flex flex-wrap gap-2">
+          {/* Memberships */}
+          <div className="min-w-0">
+            <h3 className="text-[14.5px] font-semibold text-ivory-on-dark">
+              Memberships
+            </h3>
+            <ul className="mt-5 flex flex-col gap-3">
               {memberships.map((m) => (
                 <li
                   key={m}
-                  className="rounded-full border border-border-dark-strong px-3 py-1 text-[11px] tracking-wide text-ivory-on-dark/80"
+                  className="text-[13.5px] text-ivory-on-dark/75"
                 >
                   {m}
                 </li>
@@ -213,43 +243,54 @@ export function Footer() {
         </div>
 
         {/* ----------------------------------------------------------
-            SEO CITY LINKS — kept, but tightened into a tag cloud.
+            SEO CITY LINKS — flat inline list, dot separators.
             ---------------------------------------------------------- */}
         <div className="mt-14 pt-8 border-t border-border-dark">
-          <h3 className="label text-muted-2">EXIM Consultants Across India</h3>
-          <ul className="mt-6 flex flex-wrap gap-x-2 gap-y-2">
-            {exImServiceCities.map((city) => (
-              <li key={city}>
+          <h3 className="text-[13.5px] font-semibold text-ivory-on-dark">
+            EXIM Consultants Across India
+          </h3>
+          <ul className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-2">
+            {exImServiceCities.map((city, i) => (
+              <li key={city} className="flex items-center gap-3">
                 <Link
                   href="#"
-                  className="inline-flex items-center rounded-full border border-border-dark px-3 py-1.5 text-[12.5px] text-ivory-on-dark/70 hover:text-ink hover:bg-ivory hover:border-ivory transition"
+                  className="text-[12.5px] text-ivory-on-dark/60 hover:text-accent transition"
                 >
                   EXIM in {city}
                 </Link>
+                {i < exImServiceCities.length - 1 && (
+                  <span className="text-ivory-on-dark/25" aria-hidden>
+                    ·
+                  </span>
+                )}
               </li>
             ))}
           </ul>
         </div>
 
         {/* ----------------------------------------------------------
-            GIANT WORDMARK — visual closer. Sits above the legal row,
-            gives the footer a strong horizon line. Sized to fit the
-            container on one line on wide screens and wrap gracefully
-            on narrower ones.
+            WATERMARK — oversized brand mark, full-bleed, low opacity.
+            Uses viewport-scaled type so it always fills the row edge-to-edge.
             ---------------------------------------------------------- */}
-        <div className="mt-14 sm:mt-20 -mb-2 select-none" aria-hidden>
-          <p className="serif text-center text-[clamp(40px,8.2vw,150px)] leading-[0.92] tracking-[-0.045em] text-ivory-on-dark/10 text-balance">
+        <div
+          aria-hidden
+          className="mt-16 sm:mt-20 select-none pointer-events-none overflow-hidden"
+        >
+          {/* Sized so "Navkar Global Sourcing" always fits inside the
+              padded container — the earlier 15.5vw/260px cap made the
+              string wider than the container on wide desktops and the
+              trailing "g" got clipped by overflow-hidden. */}
+          <p className="serif whitespace-nowrap text-center leading-none tracking-[-0.05em] text-ivory-on-dark/[0.06] text-[clamp(32px,8vw,115px)] font-medium">
             Navkar Global Sourcing
           </p>
         </div>
 
         {/* ----------------------------------------------------------
-            LEGAL ROW — copyright, legal links, dev credit.
+            LEGAL ROW — copyright · legal links · dev credit.
             ---------------------------------------------------------- */}
-        <div className="mt-8 pt-8 border-t border-border-dark flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
-          <p className="text-[12.5px] text-ivory-on-dark/70">
-            © {year}–{String(year + 1).slice(-2)} {company.name}. All rights
-            reserved.
+        <div className="mt-10 pt-6 border-t border-border-dark flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+          <p className="text-[12px] text-ivory-on-dark/60">
+            Copyright ©{year} {company.name}. All rights reserved.
           </p>
 
           <ul className="flex flex-wrap items-center gap-x-5 gap-y-2">
@@ -257,25 +298,26 @@ export function Footer() {
               <li key={l.label}>
                 <Link
                   href={l.href}
-                  className="text-[12.5px] text-ivory-on-dark/70 hover:text-accent transition"
+                  className="text-[12px] text-ivory-on-dark/60 hover:text-accent transition"
                 >
                   {l.label}
                 </Link>
               </li>
             ))}
+            <li>
+              <span className="text-[12px] text-ivory-on-dark/60">
+                Crafted by{" "}
+                <a
+                  href="https://nakshatranamahacreations.com/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-ivory-on-dark/85 hover:text-accent transition"
+                >
+                  Nakshatra Namaha Creations
+                </a>
+              </span>
+            </li>
           </ul>
-
-          <p className="text-[12.5px] text-ivory-on-dark/70">
-            Crafted by{" "}
-            <a
-              href="https://nakshatranamahacreations.com/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-ivory-on-dark hover:text-accent transition underline-offset-4 hover:underline"
-            >
-              Nakshatra Namaha Creations
-            </a>
-          </p>
         </div>
       </div>
     </footer>

@@ -6,7 +6,6 @@ import { useEffect, useRef, useState } from "react";
 import {
   Menu,
   X,
-  ArrowUpRight,
   ArrowRight,
   Check,
   ChevronDown,
@@ -14,36 +13,86 @@ import {
 } from "lucide-react";
 import { nav, plans, type NavItem } from "@/lib/content";
 
+/**
+ * Navbar — Zoom-inspired with theme adaptation.
+ *
+ * Full-width bar sticky at top with Zoom-blue (#0B5CFF) primary CTA.
+ * The navbar reads the section directly beneath it (via
+ * `[data-nav-theme]` markers) and adapts palette to match:
+ *   • light section → solid white bar, dark text
+ *   • dark section  → translucent dark bar w/ backdrop blur, light text
+ *
+ * The blue CTA stays constant across both themes — it's the visual
+ * anchor. Dropdown mega-menus on hover for items with children.
+ */
+
 type Theme = "dark" | "light";
+
+const ZOOM_BLUE = "#0B5CFF";
+const ZOOM_BLUE_HOVER = "#0847CC";
 
 export function Navbar() {
   const pathname = usePathname();
-  const [theme, setTheme] = useState<Theme>("dark");
+  const [theme, setTheme] = useState<Theme>("light");
   const [open, setOpen] = useState(false);
   const [openMenu, setOpenMenu] = useState<string | null>(null);
-  // Sticky mode: past the first section (hero), the navbar transforms from
-  // a floating pill to a full-width bar with taller height. Detected by
-  // scroll position crossing 85% of viewport height.
-  const [isSticky, setIsSticky] = useState(false);
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Watch which themed section is under the navbar to flip text colors.
+  // Theme detection — for every scroll frame, figure out which
+  // `[data-nav-theme]` section is currently painted beneath the navbar.
+  //
+  // Uses TWO strategies and picks whichever finds a match, because
+  // GSAP pins wrap sections in a pinSpacer that can mess with either
+  // strategy on its own:
+  //   1. rect scan: iterate every themed section, take the one whose
+  //      bounding box contains the sample Y. Simple + reliable for
+  //      non-pinned layouts.
+  //   2. hit-test fallback: elementsFromPoint at the sample point, walk
+  //      up to nearest themed ancestor. Catches cases where a pinned
+  //      element covers the sample point but its rect is misreported.
+  //
+  // The rect scan runs first because it's cheaper and handles the
+  // stacked-section case (one section slid over another via -mt-100vh)
+  // more predictably — the LAST match in DOM order wins, so the
+  // top-most stacked section takes precedence.
   useEffect(() => {
-    const NAV_Y = 30; // detection point in px from top of viewport
+    const SAMPLE_Y = 40;
     let raf = 0;
 
     const update = () => {
       raf = 0;
+      let next: Theme = "light";
+      let matched = false;
+
+      // ── Strategy 1: rect scan ──────────────────────────────────────
       const sections = document.querySelectorAll<HTMLElement>(
         "[data-nav-theme]",
       );
-      let next: Theme = "light";
       for (const s of Array.from(sections)) {
         const r = s.getBoundingClientRect();
-        if (r.top <= NAV_Y && r.bottom > NAV_Y) {
+        if (r.top <= SAMPLE_Y && r.bottom > SAMPLE_Y) {
           next = (s.dataset.navTheme as Theme) || "light";
+          matched = true;
         }
       }
+
+      // ── Strategy 2: hit-test fallback ──────────────────────────────
+      if (!matched) {
+        const hits = document.elementsFromPoint(
+          window.innerWidth / 2,
+          SAMPLE_Y,
+        );
+        for (const el of hits) {
+          const themed = (el as HTMLElement).closest<HTMLElement>(
+            "[data-nav-theme]",
+          );
+          if (themed) {
+            next = (themed.dataset.navTheme as Theme) || "light";
+            break;
+          }
+        }
+      }
+
       setTheme(next);
     };
 
@@ -52,55 +101,22 @@ export function Navbar() {
       raf = requestAnimationFrame(update);
     };
 
-    // Wait for the new route DOM to mount, then measure
-    const t = setTimeout(update, 0);
+    update();
+    const rafId = requestAnimationFrame(update);
     window.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("resize", update);
     return () => {
-      clearTimeout(t);
+      cancelAnimationFrame(rafId);
       if (raf) cancelAnimationFrame(raf);
       window.removeEventListener("scroll", onScroll);
       window.removeEventListener("resize", update);
     };
   }, [pathname]);
 
+  // Close menus on route change.
   useEffect(() => {
     setOpen(false);
     setOpenMenu(null);
-  }, [pathname]);
-
-  // Sticky trigger — flip to sticky mode only once the hero (first
-  // section) has fully scrolled out of view. While ANY part of the hero
-  // is still visible the pill stays. Measured against the first child of
-  // <main>, whatever the current page's hero happens to be.
-  useEffect(() => {
-    let raf = 0;
-    const update = () => {
-      raf = 0;
-      const hero = document.querySelector<HTMLElement>("main > *:first-child");
-      if (!hero) {
-        setIsSticky(false);
-        return;
-      }
-      const rect = hero.getBoundingClientRect();
-      // Hero bottom has crossed the viewport top → we're inside the
-      // second section (or later). Small buffer so the switch happens
-      // just as the seam meets the navbar rather than a few pixels late.
-      setIsSticky(rect.bottom <= 4);
-    };
-    const onScroll = () => {
-      if (raf) return;
-      raf = requestAnimationFrame(update);
-    };
-    const t = setTimeout(update, 0);
-    window.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("resize", update);
-    return () => {
-      clearTimeout(t);
-      if (raf) cancelAnimationFrame(raf);
-      window.removeEventListener("scroll", onScroll);
-      window.removeEventListener("resize", update);
-    };
   }, [pathname]);
 
   const enter = (key: string) => {
@@ -113,84 +129,69 @@ export function Navbar() {
   };
 
   const isDark = theme === "dark";
-  // Popup panels are theme-aware glass (light over dark, dark over light),
-  // so the navbar can stay in its true section theme when a menu opens —
-  // no need to force a light surface to make the panel legible.
-  const showLightBg = !isDark;
 
-  // Subtle hover-pill behind each nav link, like Apple / Stripe nav.
-  const linkHoverBg = showLightBg ? "hover:bg-ink/5" : "hover:bg-white/10";
-  const linkText = (active: boolean) =>
-    active
-      ? "text-accent"
-      : showLightBg
-        ? "text-ink/80 hover:text-ink"
-        : "text-ivory-on-dark/80 hover:text-ivory-on-dark";
+  // Palette tokens threaded through the render. Colours use inline
+  // styles + rgba so we can (a) run smooth transitions across every
+  // property including backdrop-filter, and (b) use a sub-pixel
+  // hairline instead of the visually chunkier 1px `border-b`.
+  const linkActive = isDark ? "text-[#7DA6FF]" : "text-[#0B5CFF]";
+  const linkIdle = isDark
+    ? "text-white/90 hover:text-white"
+    : "text-[#0e0f1a] hover:text-[#0B5CFF]";
+  const secondaryCta = isDark
+    ? "text-white/90 hover:text-white"
+    : "text-[#0e0f1a] hover:text-[#0B5CFF]";
+  const mobileToggle = isDark
+    ? "hover:bg-white/[0.08] text-white"
+    : "hover:bg-black/[0.04] text-[#0e0f1a]";
+  const logoColor = isDark
+    ? "text-white hover:text-[#7DA6FF]"
+    : "text-[#0e0f1a] hover:text-[#0B5CFF]";
 
   return (
     <header
-      className={`fixed inset-x-0 z-50 transition-[top,padding] duration-500 ${
-        isSticky
-          ? "top-0 px-0"
-          : "top-3 sm:top-4 wide:top-5 px-3 sm:px-5"
-      }`}
+      className="fixed inset-x-0 top-0 z-50"
+      style={{
+        // Sub-pixel hairline via inset boxShadow — reads as a true
+        // 0.5px line on high-DPI displays instead of a chunky 1px
+        // border. Both surface color and hairline transition together
+        // so the theme flip cross-fades cleanly.
+        backgroundColor: isDark
+          ? "rgba(14, 15, 26, 0.72)"
+          : "rgba(255, 255, 255, 1)",
+        backdropFilter: isDark ? "blur(22px) saturate(1.5)" : "none",
+        WebkitBackdropFilter: isDark ? "blur(22px) saturate(1.5)" : "none",
+        boxShadow: isDark
+          ? "inset 0 -0.5px 0 rgba(255, 255, 255, 0.08)"
+          : "inset 0 -0.5px 0 rgba(0, 0, 0, 0.06)",
+        transition:
+          "background-color 400ms ease, box-shadow 400ms ease, backdrop-filter 400ms ease",
+      }}
     >
-      {/* Sticky mode: full-width solid bar (taller, no gap for content
-          bleed). Non-sticky (over hero): floating rounded pill. */}
-      <div
-        className={`transition-all duration-500 backdrop-blur-2xl backdrop-saturate-150 ${
-          isSticky
-            ? showLightBg
-              ? "w-full bg-white/85 border-b border-black/[0.06]"
-              : "w-full bg-black/45"
-            : showLightBg
-              ? "mx-auto max-w-[1500px] wide:max-w-[1720px] rounded-full bg-white/75 border border-black/[0.06] shadow-[0_10px_30px_-12px_rgba(11,18,32,0.18)]"
-              : "mx-auto max-w-[1500px] wide:max-w-[1720px] rounded-full bg-black/25 shadow-[0_10px_30px_-12px_rgba(0,0,0,0.35)]"
-        }`}
-        style={
-          !showLightBg
-            ? isSticky
-              ? {
-                  /* Sub-pixel hairline bottom — a true half-pixel line on
-                     high-DPI displays instead of Tailwind's 1px border. */
-                  boxShadow: "inset 0 -0.5px 0 rgba(255,255,255,0.14)",
-                }
-              : {
-                  /* Sub-pixel hairline around the whole pill + drop shadow. */
-                  boxShadow:
-                    "0 10px 30px -12px rgba(0,0,0,0.45), inset 0 0 0 0.5px rgba(255,255,255,0.22)",
-                }
-            : undefined
-        }
-      >
-      <div
-        className={`transition-[height,padding] duration-500 flex items-center justify-between gap-6 ${
-          isSticky
-            ? "px-6 sm:px-10 lg:px-12 wide:px-16 h-[64px] sm:h-[72px] wide:h-[84px]"
-            : "px-5 sm:px-7 lg:px-8 wide:px-10 h-[64px] sm:h-[70px] wide:h-[88px]"
-        }`}
-      >
+      <div className="relative mx-auto max-w-[1500px] wide:max-w-[1720px] flex items-center justify-between gap-3 sm:gap-6 px-4 sm:px-8 lg:px-10 wide:px-14 h-[60px] sm:h-[68px] wide:h-[76px]">
         {/* Logo */}
         <Link
           href="/"
-          className={`serif uppercase text-[18px] sm:text-[20px] lg:text-[22px] wide:text-[30px] leading-none font-bold tracking-[0.02em] whitespace-nowrap transition-colors duration-500 ${
-            showLightBg ? "text-ink" : "text-ivory-on-dark"
-          }`}
+          className={`text-[15px] sm:text-[18px] lg:text-[20px] wide:text-[24px] font-bold tracking-tight whitespace-nowrap transition-colors duration-300 ${logoColor}`}
         >
           Navkar Global Sourcing
         </Link>
 
-        {/* Center nav with hover pills */}
+        {/* Center nav — absolutely centered on the header so the 5
+            items sit in the true middle regardless of logo/CTA widths.
+            "Contact" is filtered out because it already lives on the
+            right as a text link next to the Begin Enquiry button. */}
         <nav
-          className="hidden lg:flex items-center gap-1 wide:gap-2"
+          className="hidden lg:flex items-center gap-1 wide:gap-2 absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
           onMouseLeave={leave}
         >
-          {nav.map((item) => {
+          {nav.filter((item) => item.href !== "/contact").map((item) => {
             const active =
               item.href === "/"
                 ? pathname === "/"
                 : pathname?.startsWith(item.href);
             const hasMenu = !!item.children || item.mega;
+            const isOpen = openMenu === item.label;
             return (
               <div
                 key={item.href}
@@ -200,13 +201,15 @@ export function Navbar() {
                 <Link
                   href={item.href}
                   data-active={active}
-                  className={`inline-flex items-center gap-1 wide:gap-1.5 text-[13.5px] wide:text-[18px] font-semibold px-3.5 py-2 wide:px-5 wide:py-3 rounded-full transition-colors duration-300 ${linkHoverBg} ${linkText(active)}`}
+                  className={`inline-flex items-center gap-1 wide:gap-1.5 text-[14px] wide:text-[16px] font-medium px-3 py-2 wide:px-4 rounded-md transition-colors duration-300 ${
+                    active ? linkActive : linkIdle
+                  }`}
                 >
                   {item.label}
                   {hasMenu && (
                     <ChevronDown
-                      className={`h-3.5 w-3.5 wide:h-4 wide:w-4 mt-0.5 transition-transform ${
-                        openMenu === item.label ? "rotate-180" : ""
+                      className={`h-3.5 w-3.5 mt-0.5 transition-transform duration-200 ${
+                        isOpen ? "rotate-180" : ""
                       }`}
                       strokeWidth={2}
                     />
@@ -217,50 +220,52 @@ export function Navbar() {
           })}
         </nav>
 
-        {/* Right — CTA + mobile toggle */}
-        <div className="flex items-center gap-3 wide:gap-4">
-          {/* CTA: thin, borderless arrow button */}
+        {/* Right — CTAs + mobile toggle */}
+        <div className="flex items-center gap-3 sm:gap-4 wide:gap-5">
+          {/* Secondary: text link (Zoom's "Contact Sales" pattern) */}
           <Link
             href="/contact"
-            className={`group hidden sm:inline-flex items-center gap-2 wide:gap-2.5 text-[13px] wide:text-[17px] font-semibold transition-colors duration-500 ${
-              showLightBg ? "text-ink hover:text-accent" : "text-ivory-on-dark hover:text-accent-soft"
-            }`}
+            className={`hidden md:inline-flex items-center text-[14px] wide:text-[16px] font-medium transition-colors duration-300 ${secondaryCta}`}
+          >
+            Contact
+          </Link>
+
+          {/* Primary: solid Zoom blue pill button — same across themes.
+              The blue reads clearly over both light and dark backdrops. */}
+          <Link
+            href="/contact"
+            className="hidden sm:inline-flex items-center gap-1.5 text-[14px] wide:text-[15px] font-semibold text-white px-4 py-2 wide:px-5 wide:py-2.5 rounded-md transition-colors duration-200"
+            style={{ backgroundColor: ZOOM_BLUE }}
+            onMouseEnter={(e) =>
+              (e.currentTarget.style.backgroundColor = ZOOM_BLUE_HOVER)
+            }
+            onMouseLeave={(e) =>
+              (e.currentTarget.style.backgroundColor = ZOOM_BLUE)
+            }
           >
             Begin Enquiry
-            <span
-              className={`grid place-items-center h-8 w-8 wide:h-11 wide:w-11 rounded-full transition-all duration-500 group-hover:rotate-45 ${
-                showLightBg ? "bg-ink text-ivory group-hover:bg-accent" : "bg-ivory text-ink group-hover:bg-white"
-              }`}
-            >
-              <ArrowUpRight className="h-3.5 w-3.5 wide:h-[18px] wide:w-[18px]" strokeWidth={2} />
-            </span>
+            <ArrowRight className="h-4 w-4" strokeWidth={2.2} />
           </Link>
 
           {/* Mobile toggle */}
           <button
             aria-label="Toggle menu"
             onClick={() => setOpen((v) => !v)}
-            className={`lg:hidden grid place-items-center h-10 w-10 rounded-full transition-colors duration-500 ${
-              showLightBg
-                ? "hover:bg-ink/5 text-ink"
-                : "hover:bg-white/10 text-ivory-on-dark"
-            }`}
+            className={`lg:hidden grid place-items-center h-9 w-9 sm:h-10 sm:w-10 rounded-md transition-colors duration-300 ${mobileToggle}`}
           >
             {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           </button>
         </div>
       </div>
-      </div>
 
-      {/* Desktop dropdown panels */}
+      {/* Desktop dropdown panels — anchored below the whole header row */}
       <DesktopPanels
         openMenu={openMenu}
         onMouseEnter={enter}
         onMouseLeave={leave}
-        isDark={isDark}
       />
 
-      {/* Mobile menu */}
+      {/* Mobile menu — always renders on a light surface for legibility */}
       {open && <MobileMenu pathname={pathname} />}
     </header>
   );
@@ -270,12 +275,10 @@ function DesktopPanels({
   openMenu,
   onMouseEnter,
   onMouseLeave,
-  isDark,
 }: {
   openMenu: string | null;
   onMouseEnter: (k: string) => void;
   onMouseLeave: () => void;
-  isDark: boolean;
 }) {
   return (
     <>
@@ -287,17 +290,13 @@ function DesktopPanels({
             key={item.label}
             onMouseEnter={() => onMouseEnter(item.label)}
             onMouseLeave={onMouseLeave}
-            className={`hidden lg:block absolute left-1/2 -translate-x-1/2 top-full pt-3 origin-top transition-all duration-200 ${
+            className={`hidden lg:block absolute left-1/2 -translate-x-1/2 top-full pt-2 origin-top transition-all duration-200 ${
               isOpen
                 ? "opacity-100 translate-y-0 pointer-events-auto"
                 : "opacity-0 -translate-y-1 pointer-events-none"
             }`}
           >
-            {item.mega ? (
-              <ServicesMega isDark={isDark} />
-            ) : (
-              <ChildrenPanel item={item} isDark={isDark} />
-            )}
+            {item.mega ? <ServicesMega /> : <ChildrenPanel item={item} />}
           </div>
         );
       })}
@@ -305,77 +304,9 @@ function DesktopPanels({
   );
 }
 
-// Theme-aware glass class map. Over dark sections we render a LIGHT glass
-// panel (frosted white); over light sections we render a DARK glass panel
-// (frosted ink). Opacity kept high (~92%) so the panel reads clearly over
-// busy hero video without needing an opaque backing.
-//
-// Enhancement pass: hairlines softened, hover states unified around a
-// left-accent stroke + subtle lift, shadows re-tuned from theatrical to
-// architectural. Featured plan card keeps a distinct treatment but no
-// longer over-glows.
-function useGlass(isDark: boolean) {
-  return isDark
-    ? {
-        container:
-          "bg-white/[0.92] backdrop-blur-2xl backdrop-saturate-150 border border-ink/[0.06] text-ink shadow-[0_20px_60px_-20px_rgba(11,18,32,0.35),0_2px_8px_-2px_rgba(11,18,32,0.08)] ring-1 ring-white/40",
-        card: "border-transparent bg-transparent hover:bg-ink/[0.035]",
-        iconBg:
-          "bg-ink/[0.05] text-ink group-hover:bg-accent group-hover:text-white",
-        title: "text-ink",
-        blurb: "text-muted",
-        arrow: "text-muted-2 group-hover:text-accent",
-        rule: "border-ink/[0.08]",
-        label: "text-muted-2",
-        planCard:
-          "border-ink/[0.06] bg-white/[0.35] hover:bg-white/70 hover:border-ink/15 hover:shadow-[0_18px_40px_-20px_rgba(11,18,32,0.25)]",
-        planCardFeatured:
-          "border-accent/40 bg-white/70 hover:bg-white/85 hover:border-accent/60 shadow-[0_18px_40px_-24px_rgba(29,111,184,0.35)]",
-        planTitle: "text-ink",
-        planPointer: "text-ink/75",
-        planPointerDot: "bg-accent",
-        planCheckBg: "bg-accent/12 text-accent",
-        planBadge: "bg-accent text-white",
-        planCta:
-          "bg-ink text-white group-hover:bg-accent transition-colors",
-        planCtaFeatured:
-          "bg-accent text-white group-hover:bg-ink transition-colors",
-        planPriceLabel: "text-muted-2",
-        planPrice: "text-ink",
-        planMoreCounter: "text-muted-2",
-      }
-    : {
-        container:
-          "bg-[#0f1a24]/[0.88] backdrop-blur-2xl backdrop-saturate-150 border border-white/[0.08] text-ivory-on-dark shadow-[0_30px_70px_-20px_rgba(0,0,0,0.55),0_2px_10px_-2px_rgba(0,0,0,0.3)] ring-1 ring-white/[0.03]",
-        card: "border-transparent bg-transparent hover:bg-white/[0.04]",
-        iconBg:
-          "bg-white/[0.08] text-ivory-on-dark group-hover:bg-accent group-hover:text-white",
-        title: "text-ivory-on-dark",
-        blurb: "text-muted-on-dark",
-        arrow: "text-muted-on-dark-2 group-hover:text-accent-soft",
-        rule: "border-white/[0.08]",
-        label: "text-muted-on-dark-2",
-        planCard:
-          "border-white/[0.08] bg-white/[0.02] hover:bg-white/[0.05] hover:border-white/[0.16] hover:shadow-[0_20px_40px_-20px_rgba(0,0,0,0.5)]",
-        planCardFeatured:
-          "border-accent/50 bg-accent/[0.06] hover:bg-accent/[0.09] hover:border-accent/70 shadow-[0_18px_40px_-24px_rgba(29,111,184,0.45)]",
-        planTitle: "text-ivory-on-dark",
-        planPointer: "text-ivory-on-dark/80",
-        planPointerDot: "bg-accent",
-        planCheckBg: "bg-accent/18 text-accent-soft",
-        planBadge: "bg-accent text-white",
-        planCta:
-          "bg-white/[0.06] text-ivory-on-dark border border-white/10 group-hover:bg-accent group-hover:border-accent",
-        planCtaFeatured:
-          "bg-accent text-white group-hover:bg-white group-hover:text-ink transition-colors",
-        planPriceLabel: "text-muted-on-dark-2",
-        planPrice: "text-ivory-on-dark",
-        planMoreCounter: "text-muted-on-dark-2",
-      };
-}
-
-function ChildrenPanel({ item, isDark }: { item: NavItem; isDark: boolean }) {
-  const g = useGlass(isDark);
+// Light dropdown panel — Zoom-style clean white surface with soft shadow
+// and dark text. No glassmorphism, no dark variant.
+function ChildrenPanel({ item }: { item: NavItem }) {
   const footerLabel =
     item.label === "About"
       ? "Est. 2000 · Mumbai · Pune · Delhi"
@@ -383,7 +314,7 @@ function ChildrenPanel({ item, isDark }: { item: NavItem; isDark: boolean }) {
         ? "Updated daily by the advisory desk"
         : undefined;
   return (
-    <div className={`rounded-2xl p-3 w-[min(580px,92vw)] ${g.container}`}>
+    <div className="rounded-xl bg-white border border-black/[0.08] shadow-[0_20px_60px_-20px_rgba(11,18,32,0.25),0_4px_12px_-4px_rgba(11,18,32,0.08)] p-3 w-[min(580px,92vw)]">
       <div className="grid gap-1 sm:grid-cols-2">
         {item.children?.map((c) => {
           const Icon = c.icon as LucideIcon | undefined;
@@ -391,57 +322,42 @@ function ChildrenPanel({ item, isDark }: { item: NavItem; isDark: boolean }) {
             <Link
               key={c.href}
               href={c.href}
-              className={`group relative flex items-start gap-3 rounded-xl p-2.5 transition-all duration-300 overflow-hidden ${g.card}`}
+              className="group relative flex items-start gap-3 rounded-lg p-2.5 transition-colors duration-200 hover:bg-[#0B5CFF]/[0.05]"
             >
-              {/* Left accent stroke — grows on hover, matches the site's
-                  timeline-underline motif. */}
-              <span
-                aria-hidden="true"
-                className="absolute left-0 top-2.5 bottom-2.5 w-[2px] rounded-r-full bg-accent origin-top scale-y-0 transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-y-100"
-              />
-
-              <span
-                className={`mt-0.5 grid place-items-center h-9 w-9 rounded-lg transition-all duration-500 shrink-0 ${g.iconBg}`}
-              >
+              <span className="mt-0.5 grid place-items-center h-9 w-9 rounded-lg bg-[#0B5CFF]/[0.08] text-[#0B5CFF] shrink-0 transition-colors group-hover:bg-[#0B5CFF] group-hover:text-white">
                 {Icon ? (
-                  <Icon className="h-3.5 w-3.5" strokeWidth={1.6} />
+                  <Icon className="h-4 w-4" strokeWidth={1.75} />
                 ) : (
-                  <ArrowUpRight
-                    className="h-3.5 w-3.5 -rotate-45 group-hover:rotate-0 transition"
-                    strokeWidth={1.6}
-                  />
+                  <ArrowRight className="h-4 w-4" strokeWidth={1.75} />
                 )}
               </span>
               <span className="flex flex-col min-w-0 flex-1">
-                <span className={`text-[13px] font-medium leading-tight ${g.title}`}>
+                <span className="text-[13.5px] font-semibold leading-tight text-[#0e0f1a] group-hover:text-[#0B5CFF] transition-colors">
                   {c.label}
                 </span>
                 {c.blurb && (
-                  <span className={`text-[11px] mt-1 leading-relaxed ${g.blurb}`}>
+                  <span className="text-[12px] mt-1 leading-relaxed text-[#4a5061]">
                     {c.blurb}
                   </span>
                 )}
               </span>
-              <ArrowUpRight
-                aria-hidden="true"
-                className={`mt-0.5 h-3.5 w-3.5 shrink-0 transition-all duration-500 opacity-0 -translate-x-1 -translate-y-0.5 group-hover:opacity-100 group-hover:translate-x-0 group-hover:translate-y-0 ${g.arrow}`}
-                strokeWidth={2}
-              />
             </Link>
           );
         })}
       </div>
       {footerLabel && (
-        <div className={`mt-2 pt-3 border-t flex items-center justify-between px-1 ${g.rule}`}>
-          <span className={`label ${g.label}`}>{footerLabel}</span>
+        <div className="mt-2 pt-3 border-t border-black/[0.08] flex items-center justify-between px-1">
+          <span className="text-[11px] uppercase tracking-[0.14em] font-medium text-[#6b7180]">
+            {footerLabel}
+          </span>
           <Link
             href={item.href}
-            className={`group inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-[11px] font-medium tracking-tight transition-all duration-500 ${g.planCtaFeatured}`}
+            className="group inline-flex items-center gap-1.5 text-[12px] font-semibold text-[#0B5CFF] hover:text-[#0847CC] transition-colors"
           >
             View {item.label.toLowerCase()}
             <ArrowRight
-              className="h-3 w-3 transition-transform duration-500 group-hover:translate-x-0.5"
-              strokeWidth={2}
+              className="h-3.5 w-3.5 transition-transform duration-200 group-hover:translate-x-0.5"
+              strokeWidth={2.2}
             />
           </Link>
         </div>
@@ -450,25 +366,25 @@ function ChildrenPanel({ item, isDark }: { item: NavItem; isDark: boolean }) {
   );
 }
 
-function ServicesMega({ isDark }: { isDark: boolean }) {
-  const g = useGlass(isDark);
+function ServicesMega() {
   return (
-    <div className={`rounded-2xl p-4 w-[min(900px,92vw)] ${g.container}`}>
+    <div className="rounded-xl bg-white border border-black/[0.08] shadow-[0_20px_60px_-20px_rgba(11,18,32,0.25),0_4px_12px_-4px_rgba(11,18,32,0.08)] p-4 w-[min(900px,92vw)]">
       <div className="grid gap-3 lg:grid-cols-4">
         {plans.map((plan) => {
           const Icon = plan.icon as LucideIcon;
+          const featured = plan.featured;
           return (
             <Link
               key={plan.slug}
               href={`/services#${plan.slug}`}
-              className={`group relative flex flex-col rounded-xl border p-4 transition-all duration-500 hover:-translate-y-1 ${
-                plan.featured ? g.planCardFeatured : g.planCard
+              className={`group relative flex flex-col rounded-lg border p-4 transition-all duration-200 hover:-translate-y-0.5 ${
+                featured
+                  ? "border-[#0B5CFF]/40 bg-[#0B5CFF]/[0.04] hover:bg-[#0B5CFF]/[0.08] hover:border-[#0B5CFF]/60"
+                  : "border-black/[0.08] bg-white hover:border-black/[0.15] hover:shadow-[0_10px_30px_-12px_rgba(11,18,32,0.15)]"
               }`}
             >
-              {plan.featured && (
-                <span
-                  className={`absolute -top-2 left-4 inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[9px] font-semibold tracking-[0.14em] uppercase ${g.planBadge}`}
-                >
+              {featured && (
+                <span className="absolute -top-2 left-4 inline-flex items-center gap-1.5 rounded-full bg-[#0B5CFF] text-white px-2 py-0.5 text-[9px] font-semibold tracking-[0.14em] uppercase">
                   <span
                     aria-hidden="true"
                     className="block h-1 w-1 rounded-full bg-white/80"
@@ -477,37 +393,31 @@ function ServicesMega({ isDark }: { isDark: boolean }) {
                 </span>
               )}
 
-              {/* Head — icon */}
-              <span
-                className={`grid place-items-center h-10 w-10 rounded-lg transition-all duration-500 ${g.iconBg}`}
-              >
-                <Icon className="h-4 w-4" strokeWidth={1.6} />
+              <span className="grid place-items-center h-10 w-10 rounded-lg bg-[#0B5CFF]/[0.08] text-[#0B5CFF] transition-colors group-hover:bg-[#0B5CFF] group-hover:text-white">
+                <Icon className="h-4 w-4" strokeWidth={1.75} />
               </span>
 
-              {/* Name + tagline */}
-              <h3 className={`serif mt-3.5 text-[15px] leading-tight ${g.planTitle}`}>
+              <h3 className="mt-3.5 text-[15px] font-semibold leading-tight text-[#0e0f1a]">
                 {plan.name}
               </h3>
-              <p className="serif-italic mt-1 text-[11px] text-accent leading-snug">
+              <p className="mt-1 text-[11.5px] text-[#0B5CFF] leading-snug">
                 {plan.tagline}
               </p>
 
-              {/* Divider */}
               <span
                 aria-hidden="true"
-                className={`mt-3 block border-t ${g.rule}`}
+                className="mt-3 block border-t border-black/[0.08]"
               />
 
-              {/* Bullets — first 3 only */}
               <ul className="mt-3 space-y-2">
                 {plan.pointers.slice(0, 3).map((p) => (
                   <li
                     key={p}
-                    className={`flex items-start gap-2 text-[11px] leading-snug ${g.planPointer}`}
+                    className="flex items-start gap-2 text-[11.5px] leading-snug text-[#4a5061]"
                   >
                     <span
                       aria-hidden="true"
-                      className={`mt-[3px] grid place-items-center h-3.5 w-3.5 shrink-0 rounded-full ${g.planCheckBg}`}
+                      className="mt-[3px] grid place-items-center h-3.5 w-3.5 shrink-0 rounded-full bg-[#0B5CFF]/[0.12] text-[#0B5CFF]"
                     >
                       <Check className="h-2 w-2" strokeWidth={3} />
                     </span>
@@ -515,23 +425,24 @@ function ServicesMega({ isDark }: { isDark: boolean }) {
                   </li>
                 ))}
                 {plan.pointers.length > 3 && (
-                  <li className={`text-[10px] pl-[22px] ${g.planMoreCounter}`}>
+                  <li className="text-[10.5px] pl-[22px] text-[#6b7180]">
                     +{plan.pointers.length - 3} more
                   </li>
                 )}
               </ul>
 
-              {/* CTA at bottom */}
               <span className="mt-auto pt-4 block" aria-hidden="true">
                 <span
-                  className={`flex items-center justify-center gap-1.5 rounded-full px-3 py-1.5 text-[11px] font-medium tracking-tight transition-all duration-500 ${
-                    plan.featured ? g.planCtaFeatured : g.planCta
+                  className={`flex items-center justify-center gap-1.5 rounded-md px-3 py-2 text-[12px] font-semibold transition-colors duration-200 ${
+                    featured
+                      ? "bg-[#0B5CFF] text-white group-hover:bg-[#0847CC]"
+                      : "bg-[#0e0f1a] text-white group-hover:bg-[#0B5CFF]"
                   }`}
                 >
                   Enquire
                   <ArrowRight
-                    className="h-3 w-3 transition-transform duration-500 group-hover:translate-x-0.5"
-                    strokeWidth={2}
+                    className="h-3.5 w-3.5 transition-transform duration-200 group-hover:translate-x-0.5"
+                    strokeWidth={2.2}
                   />
                 </span>
               </span>
@@ -539,20 +450,18 @@ function ServicesMega({ isDark }: { isDark: boolean }) {
           );
         })}
       </div>
-      <div
-        className={`mt-4 pt-3 border-t flex items-center justify-between px-1 ${g.rule}`}
-      >
-        <span className={`label ${g.label}`}>
+      <div className="mt-4 pt-3 border-t border-black/[0.08] flex items-center justify-between px-1">
+        <span className="text-[11px] uppercase tracking-[0.14em] font-medium text-[#6b7180]">
           04 sourcing plans · Basic to Custom Pro
         </span>
         <Link
           href="/services"
-          className={`group inline-flex items-center gap-1.5 text-[12px] font-medium transition-colors duration-300 ${g.title} hover:text-accent`}
+          className="group inline-flex items-center gap-1.5 text-[12px] font-semibold text-[#0B5CFF] hover:text-[#0847CC] transition-colors"
         >
           Compare all plans
-          <ArrowUpRight
-            className="h-3.5 w-3.5 transition-transform duration-500 group-hover:rotate-45"
-            strokeWidth={2}
+          <ArrowRight
+            className="h-3.5 w-3.5 transition-transform duration-200 group-hover:translate-x-0.5"
+            strokeWidth={2.2}
           />
         </Link>
       </div>
@@ -563,7 +472,7 @@ function ServicesMega({ isDark }: { isDark: boolean }) {
 function MobileMenu({ pathname }: { pathname: string | null }) {
   const [expanded, setExpanded] = useState<string | null>(null);
   return (
-    <div className="lg:hidden mx-auto max-w-[1500px] mt-2 rounded-2xl bg-white border border-black/[0.06] shadow-[0_18px_40px_-14px_rgba(11,18,32,0.25)] max-h-[80vh] overflow-y-auto">
+    <div className="lg:hidden bg-white border-t border-black/[0.08] max-h-[80vh] overflow-y-auto">
       <nav className="flex flex-col gap-1 p-4">
         {nav.map((item) => {
           const active =
@@ -574,13 +483,13 @@ function MobileMenu({ pathname }: { pathname: string | null }) {
           const isExpanded = expanded === item.label;
           return (
             <div key={item.href}>
-              <div className="flex items-stretch rounded-xl overflow-hidden">
+              <div className="flex items-stretch rounded-md overflow-hidden">
                 <Link
                   href={item.href}
-                  className={`flex-1 px-4 py-3 text-base ${
+                  className={`flex-1 px-4 py-3 text-[15px] font-medium ${
                     active
-                      ? "text-accent bg-surface"
-                      : "text-ink hover:bg-surface"
+                      ? "text-[#0B5CFF] bg-[#0B5CFF]/[0.05]"
+                      : "text-[#0e0f1a] hover:bg-black/[0.04]"
                   }`}
                 >
                   {item.label}
@@ -591,7 +500,7 @@ function MobileMenu({ pathname }: { pathname: string | null }) {
                     onClick={() =>
                       setExpanded(isExpanded ? null : item.label)
                     }
-                    className="grid place-items-center w-12 hover:bg-surface text-muted"
+                    className="grid place-items-center w-12 hover:bg-black/[0.04] text-[#4a5061]"
                   >
                     <ChevronDown
                       className={`h-4 w-4 transition-transform ${
@@ -603,22 +512,23 @@ function MobileMenu({ pathname }: { pathname: string | null }) {
               </div>
 
               {hasMenu && isExpanded && (
-                <div className="mt-1 mb-2 ml-4 pl-4 border-l border-border flex flex-col gap-1 py-2">
+                <div className="mt-1 mb-2 ml-4 pl-4 border-l border-black/[0.08] flex flex-col gap-1 py-2">
                   {item.mega
                     ? plans.map((p) => (
                         <Link
                           key={p.slug}
                           href={`/services#${p.slug}`}
-                          className="px-3 py-2 text-sm text-muted hover:text-ink hover:bg-surface rounded-lg"
+                          className="px-3 py-2 text-[13.5px] text-[#4a5061] hover:text-[#0B5CFF] hover:bg-[#0B5CFF]/[0.05] rounded-md"
                         >
-                          {p.name} — <span className="text-muted-2">{p.tagline}</span>
+                          {p.name} —{" "}
+                          <span className="text-[#6b7180]">{p.tagline}</span>
                         </Link>
                       ))
                     : item.children?.map((c) => (
                         <Link
                           key={c.href}
                           href={c.href}
-                          className="px-3 py-2 text-sm text-muted hover:text-ink hover:bg-surface rounded-lg"
+                          className="px-3 py-2 text-[13.5px] text-[#4a5061] hover:text-[#0B5CFF] hover:bg-[#0B5CFF]/[0.05] rounded-md"
                         >
                           {c.label}
                         </Link>
@@ -630,10 +540,10 @@ function MobileMenu({ pathname }: { pathname: string | null }) {
         })}
         <Link
           href="/contact"
-          className="mt-3 inline-flex items-center justify-center gap-2 rounded-full bg-ink text-ivory py-3 text-sm font-medium"
+          className="mt-3 inline-flex items-center justify-center gap-2 rounded-md bg-[#0B5CFF] hover:bg-[#0847CC] text-white py-3 text-[14px] font-semibold transition-colors"
         >
           Begin Enquiry
-          <ArrowUpRight className="h-4 w-4" />
+          <ArrowRight className="h-4 w-4" strokeWidth={2.2} />
         </Link>
       </nav>
     </div>

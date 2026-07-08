@@ -23,7 +23,7 @@ export function CTASection() {
           trigger: rootRef.current,
           start: "top top",
           end: "+=80%",
-          pin: true,
+          pin: false,
           pinSpacing: true,
           anticipatePin: 1,
           invalidateOnRefresh: true,
@@ -39,7 +39,7 @@ export function CTASection() {
     <section
       ref={rootRef}
       data-nav-theme="dark"
-      className="dark-section relative w-full px-6 sm:px-10 min-h-svh flex items-center justify-center py-24 sm:py-32 overflow-hidden"
+      className="dark-section relative w-full px-5 sm:px-10 min-h-svh flex items-center justify-center py-16 sm:py-32 overflow-hidden"
     >
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
@@ -55,17 +55,17 @@ export function CTASection() {
         aria-hidden
         className="absolute inset-0 bg-[linear-gradient(180deg,rgba(4,12,24,0.75)_0%,rgba(4,12,24,0.7)_50%,rgba(4,12,24,0.85)_100%)]"
       />
-      <div className="relative mx-auto max-w-[1320px] flex flex-col items-center text-center gap-10 [text-shadow:0_2px_18px_rgba(0,0,0,0.55)]">
+      <div className="relative mx-auto max-w-[1320px] flex flex-col items-center text-center gap-6 sm:gap-10 [text-shadow:0_2px_18px_rgba(0,0,0,0.55)]">
         <Eyebrow>A new project</Eyebrow>
 
-        <h2 className="serif font-black uppercase text-[clamp(34px,5vw,80px)] leading-[1.02] tracking-[-0.02em] text-balance max-w-[1100px]">
+        <h2 className="serif font-black uppercase text-[clamp(26px,5vw,80px)] leading-[1.05] sm:leading-[1.02] tracking-[-0.02em] text-balance max-w-[1100px]">
           Every trade service,{" "}
           <span className="serif-italic font-black text-accent normal-case">
             one accountable team.
           </span>
         </h2>
 
-        <p className="max-w-2xl text-[16px] sm:text-[17px] leading-relaxed font-bold text-ivory-on-dark">
+        <p className="max-w-2xl text-[14.5px] sm:text-[17px] leading-relaxed font-bold text-ivory-on-dark">
           We take on a limited number of new client engagements each quarter.
           Tell us about the consignment, licence or scheme — a senior advisor
           will respond within one business day.

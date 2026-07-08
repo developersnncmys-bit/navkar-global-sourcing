@@ -30,7 +30,7 @@ export function ServicesPreview() {
   const [active, setActive] = useState<number>(0);
 
   return (
-    <SectionShell dark className="py-28 sm:py-40 relative z-20 bg-espresso md:-mt-[100vh]">
+    <SectionShell dark className="py-20 sm:py-40 relative z-20 bg-espresso md:-mt-[100vh]">
       <SectionHeading
         eyebrow="What we offer"
         title={
@@ -47,7 +47,7 @@ export function ServicesPreview() {
         whileInView={{ opacity: 1 }}
         viewport={{ once: true, margin: "-80px" }}
         transition={{ duration: 0.6 }}
-        className="mt-16 flex flex-col gap-3 lg:flex-row lg:h-[480px]"
+        className="mt-10 sm:mt-16 flex flex-col gap-3 lg:flex-row lg:h-[480px]"
       >
         {featured.map((s, i) => {
           const isActive = active === i;
@@ -105,7 +105,7 @@ export function ServicesPreview() {
 
               {/* Revealed content — shows on active */}
               <div
-                className={`absolute inset-x-0 bottom-0 p-7 sm:p-9 pr-20 transition-all duration-500 ${
+                className={`absolute inset-x-0 bottom-0 p-5 sm:p-9 pr-16 sm:pr-20 transition-all duration-500 ${
                   isActive
                     ? "opacity-100 translate-y-0"
                     : "opacity-0 translate-y-4 pointer-events-none"
@@ -114,17 +114,17 @@ export function ServicesPreview() {
                 <span className="label text-accent-soft eyebrow-dot">
                   {s.group}
                 </span>
-                <h3 className="serif mt-3 text-[clamp(22px,2.6vw,34px)] uppercase text-ivory-on-dark">
+                <h3 className="serif mt-2.5 sm:mt-3 text-[clamp(18px,2.6vw,34px)] uppercase text-ivory-on-dark">
                   {s.title}
                 </h3>
-                <p className="mt-3 max-w-md text-[14px] sm:text-[15px] text-ivory-on-dark/85 leading-relaxed text-pretty">
+                <p className="mt-2 sm:mt-3 max-w-md text-[13px] sm:text-[15px] text-ivory-on-dark/85 leading-relaxed text-pretty">
                   {s.blurb}
                 </p>
               </div>
 
               {/* Arrow button — bottom-right, accent on active */}
               <span
-                className={`absolute bottom-5 right-5 grid h-11 w-11 place-items-center rounded-xl transition-all duration-500 ${
+                className={`absolute bottom-4 right-4 sm:bottom-5 sm:right-5 grid h-10 w-10 sm:h-11 sm:w-11 place-items-center rounded-xl transition-all duration-500 ${
                   isActive
                     ? "bg-accent text-ivory-on-dark scale-100"
                     : "bg-ivory/15 text-ivory-on-dark/80 backdrop-blur-sm scale-90 group-hover:scale-100"

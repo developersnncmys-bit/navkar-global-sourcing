@@ -1,86 +1,94 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useState, useEffect } from "react";
 import { useGSAP } from "@gsap/react";
 import { gsap, ScrollTrigger } from "@/lib/gsap";
 import { plans } from "@/lib/content";
-import { ArrowUpRight, Check, Star } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
 import { SectionShell } from "@/components/ui";
 
 // Cinematic image per plan, matching the plan's narrative.
+//   Basic       → professional handshake, warm office. Represents
+//                 already-have-supplier contact & payment support.
+//   Pro         → textile-factory workers inspecting fabric. Represents
+//                 supplier sourcing & verification.
+//   Custom     → shipping-container port. Represents bundled logistics.
+//   Custom Pro → business traveler with suitcase in airport corridor.
+//                 Represents client-travel plans to China.
 const panelImages = [
-  "https://images.pexels.com/photos/8837510/pexels-photo-8837510.jpeg?auto=compress&cs=tinysrgb&w=1200",
-  "https://images.pexels.com/photos/31090804/pexels-photo-31090804.jpeg?auto=compress&cs=tinysrgb&w=1200",
-  "https://images.pexels.com/photos/14020705/pexels-photo-14020705.jpeg?auto=compress&cs=tinysrgb&w=1200",
-  "https://images.pexels.com/photos/6050133/pexels-photo-6050133.jpeg?auto=compress&cs=tinysrgb&w=1200",
+  "https://images.pexels.com/photos/7792841/pexels-photo-7792841.jpeg?auto=compress&cs=tinysrgb&w=1200",
+  "https://images.pexels.com/photos/31090818/pexels-photo-31090818.jpeg?auto=compress&cs=tinysrgb&w=1200",
+  "https://images.pexels.com/photos/1624694/pexels-photo-1624694.jpeg?auto=compress&cs=tinysrgb&w=1200",
+  "https://images.pexels.com/photos/4173219/pexels-photo-4173219.jpeg?auto=compress&cs=tinysrgb&w=1200",
 ];
 
 /**
- * GroupCompaniesSection — client requirement: all four plans must be
- * visible in the same viewport (no sliders, no accordions, no tabs).
- * Rendered as a 4-column card rail on desktop that collapses to 2×2
- * on tablet and a single stack on mobile. Each card carries enough
- * substance — cinematic image, plan name, tagline, top three
- * pointers, CTA — to stand on its own without opening a detail page,
- * while the featured "Most enquired" plan gets an accent border and a
- * ribbon badge to steer the eye.
- * A dark overlay dissolves as the section reaches the viewport top
- * so the seam from the dark ProductCategories marquee above isn't a
- * hard black-to-white cut.
+ * GroupCompaniesSection — Helios-style split layout for the four sourcing
+ * plans. Left column: sticky numbered nav (01–04) that highlights the
+ * card currently in view. Right column: stacked plan cards, each with a
+ * left-side image and right-side copy + CTA. IntersectionObserver on
+ * each card drives the left-nav active state; clicking a left-nav item
+ * smooth-scrolls the matching card into view.
  */
 export function GroupCompaniesSection() {
   const rootRef = useRef(null);
-  const gridRef = useRef(null);
-  const darkOverlayRef = useRef(null);
+  const headerRef = useRef(null);
+  const cardsWrapRef = useRef(null);
+  const [activeSlug, setActiveSlug] = useState(plans[0].slug);
+
+  // Track which card is closest to viewport center so the left nav
+  // reflects the current reading position.
+  useEffect(() => {
+    const nodes = plans
+      .map((p) => document.getElementById(`plan-card-${p.slug}`))
+      .filter(Boolean);
+    if (!nodes.length) return;
+
+    const io = new IntersectionObserver(
+      (entries) => {
+        const visible = entries
+          .filter((e) => e.isIntersecting)
+          .sort((a, b) => b.intersectionRatio - a.intersectionRatio);
+        if (visible[0]) {
+          const slug = visible[0].target.getAttribute("data-slug");
+          if (slug) setActiveSlug(slug);
+        }
+      },
+      {
+        root: null,
+        rootMargin: "-30% 0px -55% 0px",
+        threshold: [0, 0.1, 0.25, 0.5, 0.75, 1],
+      },
+    );
+
+    nodes.forEach((n) => io.observe(n));
+    return () => io.disconnect();
+  }, []);
 
   useGSAP(
     () => {
       const reduced =
         typeof window !== "undefined" &&
         window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-      if (reduced) {
-        if (darkOverlayRef.current)
-          gsap.set(darkOverlayRef.current, { opacity: 0 });
-        return;
-      }
-
-      if (darkOverlayRef.current) {
-        gsap.set(darkOverlayRef.current, { opacity: 1 });
-        gsap.fromTo(
-          darkOverlayRef.current,
-          { opacity: 1 },
-          {
-            opacity: 0,
-            ease: "sine.inOut",
-            scrollTrigger: {
-              trigger: rootRef.current,
-              start: "top 20%",
-              end: "top top",
-              scrub: 0.8,
-              invalidateOnRefresh: true,
-            },
-          },
-        );
-      }
+      if (reduced) return;
 
       const mm = gsap.matchMedia();
 
       mm.add("(min-width: 768px)", () => {
-        const cards = gridRef.current?.querySelectorAll("[data-card]");
+        const cards = cardsWrapRef.current?.querySelectorAll("[data-card]");
         if (!cards?.length) return;
 
-        gsap.set(cards, { opacity: 0, y: 28 });
+        gsap.set(cards, { opacity: 0, y: 40 });
         const tween = gsap.to(cards, {
           opacity: 1,
           y: 0,
-          duration: 0.6,
+          duration: 0.7,
           ease: "power3.out",
-          stagger: 0.08,
+          stagger: 0.1,
           scrollTrigger: {
-            trigger: gridRef.current,
-            start: "top 85%",
-            end: "top 55%",
-            scrub: 0.8,
+            trigger: cardsWrapRef.current,
+            start: "top 80%",
+            toggleActions: "play none none reverse",
             invalidateOnRefresh: true,
           },
         });
@@ -96,57 +104,199 @@ export function GroupCompaniesSection() {
     { scope: rootRef },
   );
 
+  const scrollToPlan = (slug) => {
+    const el = document.getElementById(`plan-card-${slug}`);
+    if (!el) return;
+    const y = el.getBoundingClientRect().top + window.scrollY - 120;
+    window.scrollTo({ top: y, behavior: "smooth" });
+  };
+
   return (
     <section
       ref={rootRef}
       data-nav-theme="light"
       aria-label="Our sourcing plans"
-      className="relative w-full overflow-hidden bg-background"
+      className="relative w-full bg-background"
     >
-      {/* Dark overlay bridging the seam from the dark ProductCategories
-          marquee above — stays black until the section top nears the
-          viewport top, then dissolves 1 → 0. */}
-      <div
-        ref={darkOverlayRef}
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-0 z-40"
-        style={{ background: "#050505" }}
-      />
-
-      <SectionShell className="pt-20 sm:pt-28 pb-14 sm:pb-20">
-        <div className="mx-auto max-w-[1100px] text-center">
-          <span className="inline-flex items-center gap-2 text-[11px] font-semibold tracking-[0.32em] uppercase text-accent">
+      <SectionShell className="pt-16 sm:pt-28 pb-12 sm:pb-20">
+        {/* Header — unchanged per brief. */}
+        <div ref={headerRef} className="mx-auto max-w-[1100px] text-center">
+          <span className="inline-flex items-center gap-2 text-[10px] sm:text-[11px] font-semibold tracking-[0.24em] sm:tracking-[0.32em] uppercase text-accent">
             <span aria-hidden className="h-1.5 w-1.5 rounded-full bg-accent" />
             Our services
           </span>
-          <h2 className="mt-5 text-[clamp(36px,4.6vw,68px)] font-bold leading-[1.02] tracking-[-0.03em] text-foreground text-balance uppercase">
-            Four ways to source,{" "}
-            <span className="text-accent font-bold">
-              one accountable desk.
-            </span>
+          <h2 className="serif mt-4 sm:mt-6 mx-auto max-w-[48rem] text-[clamp(28px,4vw,46px)] font-semibold leading-[1.15] tracking-[-0.02em] text-foreground">
+            Four ways to source, one accountable desk.
           </h2>
-          <p className="mt-6 text-[15px] sm:text-[17px] text-muted leading-relaxed text-pretty max-w-[640px] mx-auto">
+          <p className="mt-5 sm:mt-6 text-[14.5px] sm:text-[17px] text-muted leading-relaxed text-pretty max-w-[640px] mx-auto">
             Whether you already have a supplier, need us to find one, want a
             bundled custom package, or plan to fly out yourself — pick the plan
             that matches where you are in the sourcing journey.
           </p>
         </div>
 
-        <div
-          ref={gridRef}
-          className="mt-10 sm:mt-14 grid gap-4 sm:gap-5 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4"
-        >
-          {plans.map((plan, i) => (
-            <PlanCard
-              key={plan.slug}
-              index={i + 1}
-              plan={plan}
-              image={panelImages[i] ?? panelImages[0]}
-            />
-          ))}
+        {/* Helios split layout: sticky nav (left) + stacked cards (right). */}
+        <div className="mt-12 sm:mt-20 grid gap-10 lg:gap-16 lg:grid-cols-12">
+          {/* ---------- Left: sticky numbered nav ---------- */}
+          <aside className="lg:col-span-4">
+            <div className="lg:sticky lg:top-32">
+              {/* Small section label — anchors the rail as a discrete
+                  navigation module rather than a loose list of buttons. */}
+              <div className="mb-6 flex items-baseline justify-between">
+                <span className="text-[10px] font-semibold tracking-[0.28em] uppercase text-muted-2">
+                  Sourcing plans
+                </span>
+                <span className="font-mono text-[10px] tracking-[0.14em] text-muted-2/70">
+                  {String(plans.findIndex((p) => p.slug === activeSlug) + 1).padStart(2, "0")} / {String(plans.length).padStart(2, "0")}
+                </span>
+              </div>
+
+              {/* Timeline rail — a hairline runs down the left of the
+                  nav connecting all four step dots. Active step dot
+                  fills accent; inactive stay outlined. */}
+              <ul className="relative flex flex-col">
+                {/* The connecting hairline */}
+                <span
+                  aria-hidden
+                  className="absolute left-[19px] top-4 bottom-4 w-px bg-border"
+                />
+                {plans.map((plan, i) => {
+                  const num = String(i + 1).padStart(2, "0");
+                  const isActive = activeSlug === plan.slug;
+                  const activeIndex = plans.findIndex((p) => p.slug === activeSlug);
+                  const isPast = i < activeIndex;
+                  return (
+                    <li key={plan.slug} className="relative">
+                      <button
+                        type="button"
+                        onClick={() => scrollToPlan(plan.slug)}
+                        className={`group/nav w-full flex items-start gap-5 py-4 pl-0 pr-4 text-left transition-all duration-500 ${
+                          isActive
+                            ? "text-foreground"
+                            : "text-muted hover:text-foreground"
+                        }`}
+                      >
+                        {/* Step dot — sits on the hairline. Filled accent
+                            on active, filled foreground on past steps,
+                            outlined ring on upcoming. */}
+                        <span
+                          aria-hidden
+                          className={`relative z-10 mt-1 grid h-10 w-10 shrink-0 place-items-center rounded-full transition-all duration-500 ${
+                            isActive
+                              ? "bg-accent text-white shadow-[0_6px_18px_-6px_rgba(46,71,154,0.6)] scale-110"
+                              : isPast
+                                ? "bg-foreground text-white"
+                                : "bg-background border border-border text-muted-2 group-hover/nav:border-foreground/40"
+                          }`}
+                        >
+                          <span className="font-mono text-[11px] tracking-[0.06em]">
+                            {num}
+                          </span>
+                        </span>
+
+                        <span className="flex-1 min-w-0 flex flex-col gap-1 pt-0.5">
+                          <span
+                            className={`serif text-[19px] sm:text-[22px] leading-[1.15] tracking-tight transition-all duration-500 ${
+                              isActive ? "font-semibold" : "font-medium"
+                            }`}
+                          >
+                            {plan.name}
+                          </span>
+                          <span
+                            className={`text-[13px] leading-snug transition-all duration-500 ${
+                              isActive
+                                ? "text-accent opacity-100"
+                                : "text-muted/70 opacity-80 group-hover/nav:opacity-100"
+                            }`}
+                          >
+                            {plan.tagline}
+                          </span>
+                        </span>
+                      </button>
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+          </aside>
+
+          {/* ---------- Right: stacked plan cards ---------- */}
+          <div
+            ref={cardsWrapRef}
+            className="lg:col-span-8 flex flex-col gap-8 sm:gap-10"
+          >
+            {plans.map((plan, i) => {
+              const num = String(i + 1).padStart(2, "0");
+              const image = panelImages[i] ?? panelImages[0];
+              return (
+                <article
+                  key={plan.slug}
+                  id={`plan-card-${plan.slug}`}
+                  data-card
+                  data-slug={plan.slug}
+                  className="group relative overflow-hidden rounded-3xl border border-border bg-white shadow-[0_10px_40px_-20px_rgba(11,18,32,0.12)] scroll-mt-32"
+                >
+                  <div className="grid gap-0 md:grid-cols-2">
+                    {/* Image — left half on desktop, top on mobile.
+                        Padded frame so the image floats inside the card
+                        with rounded corners on all four sides + a subtle
+                        inner shadow for depth. */}
+                    <div className="relative p-3 sm:p-4 aspect-[4/3] md:aspect-auto md:min-h-[380px]">
+                      <div className="relative h-full w-full overflow-hidden rounded-2xl shadow-[inset_0_1px_0_rgba(255,255,255,0.35),inset_0_0_28px_-4px_rgba(11,18,32,0.35),0_2px_10px_-4px_rgba(11,18,32,0.15)]">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={image}
+                          alt=""
+                          aria-hidden="true"
+                          loading="lazy"
+                          decoding="async"
+                          className="absolute inset-0 h-full w-full object-cover transition-transform duration-[900ms] ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.04]"
+                        />
+                        {/* Inset shadow ring — sits above the image so the
+                            depth reads regardless of image tone. */}
+                        <div
+                          aria-hidden
+                          className="pointer-events-none absolute inset-0 rounded-2xl shadow-[inset_0_0_0_1px_rgba(11,18,32,0.06),inset_0_10px_30px_-10px_rgba(11,18,32,0.35)]"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Content — right half */}
+                    <div className="flex flex-col justify-between gap-6 p-7 sm:p-10">
+                      <div>
+                        <span className="text-[11px] font-semibold tracking-[0.24em] uppercase text-muted-2">
+                          Plan {num}
+                        </span>
+                        <h3 className="serif mt-3 text-[clamp(24px,2.8vw,34px)] font-semibold leading-[1.05] tracking-tight text-foreground">
+                          {plan.name}
+                        </h3>
+                        <p className="mt-2.5 text-[15px] sm:text-[17px] text-accent leading-snug">
+                          {plan.tagline}
+                        </p>
+                        <p className="mt-5 text-[14px] sm:text-[15px] text-muted leading-relaxed text-pretty">
+                          {plan.details}
+                        </p>
+                      </div>
+
+                      <a
+                        href={`/services#${plan.slug}`}
+                        className="inline-flex w-max items-center gap-2 rounded-full bg-foreground/[0.04] border border-border pl-5 pr-4 py-2.5 text-[13px] font-medium text-foreground transition-all duration-500 hover:bg-accent hover:border-accent hover:text-white hover:pr-5"
+                      >
+                        Enquire about {plan.name}
+                        <ArrowUpRight
+                          className="h-4 w-4 transition-transform duration-500 group-hover:rotate-45"
+                          strokeWidth={2}
+                        />
+                      </a>
+                    </div>
+                  </div>
+                </article>
+              );
+            })}
+          </div>
         </div>
 
-        <div className="mt-10 sm:mt-12 flex flex-wrap items-center justify-between gap-4 border-t border-border pt-5">
+        <div className="mt-14 sm:mt-20 flex flex-wrap items-center justify-between gap-4 border-t border-border pt-5">
           <span className="text-[11px] font-semibold tracking-[0.22em] uppercase text-muted">
             {String(plans.length).padStart(2, "0")} plans · Basic → Custom Pro
           </span>
@@ -160,115 +310,5 @@ export function GroupCompaniesSection() {
         </div>
       </SectionShell>
     </section>
-  );
-}
-
-function PlanCard({ index, plan, image }) {
-  const num = String(index).padStart(2, "0");
-  const featured = plan.featured;
-  return (
-    <a
-      href={`/services#${plan.slug}`}
-      data-card
-      aria-label={`${plan.name} plan — ${plan.tagline}`}
-      className={`group relative block overflow-hidden rounded-3xl aspect-[3/4] transition-all duration-500 hover:-translate-y-1 ${
-        featured
-          ? "ring-2 ring-accent shadow-[0_18px_40px_-16px_rgba(31,135,144,0.55)] hover:shadow-[0_30px_60px_-20px_rgba(31,135,144,0.65)]"
-          : "shadow-[0_10px_28px_-10px_rgba(11,18,32,0.35)] hover:shadow-[0_28px_54px_-18px_rgba(11,18,32,0.5)]"
-      }`}
-    >
-      {/* Full-bleed image fills the whole card. */}
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
-        src={image}
-        alt={`${plan.name} plan`}
-        loading="lazy"
-        decoding="async"
-        className="absolute inset-0 h-full w-full object-cover transition-transform duration-[1200ms] ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.08]"
-      />
-
-      {/* Bottom-heavy neutral-black gradient so overlaid text stays
-          legible on any image tone. Stops are tight to the base so the
-          image tone reads through the top two-thirds of the card
-          without any teal cast from the theme's ink. */}
-      <div
-        aria-hidden
-        className="absolute inset-0"
-        style={{
-          background:
-            "linear-gradient(to top, rgba(0,0,0,0.88) 0%, rgba(0,0,0,0.55) 30%, rgba(0,0,0,0.15) 55%, transparent 75%)",
-        }}
-      />
-
-      <div className="relative z-10 flex h-full flex-col justify-between p-4 sm:p-5">
-        {/* Top row — cream star pill (all cards) + accent 'Most enquired'
-            pill (featured only) sit at opposite corners. */}
-        <div className="flex items-start justify-between gap-2">
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-[#FEF8E6] px-2.5 py-1 text-[10px] sm:text-[10.5px] font-semibold tracking-tight text-ink shadow-[0_4px_12px_-4px_rgba(11,18,32,0.35)]">
-            <Star
-              size={11}
-              strokeWidth={0}
-              fill="#F5A623"
-              className="text-[#F5A623]"
-            />
-            <span className="tabular-nums opacity-70">{num}</span>
-            <span className="opacity-40">—</span>
-            {plan.name}
-          </span>
-          {featured && (
-            <span className="inline-flex items-center rounded-full bg-accent/95 backdrop-blur-md px-2.5 py-1 text-[9.5px] font-bold tracking-[0.16em] uppercase text-ivory shadow-[0_4px_14px_-4px_rgba(31,135,144,0.6)]">
-              Most enquired
-            </span>
-          )}
-        </div>
-
-        {/* Bottom content stack — pinned to card base via justify-between. */}
-        <div>
-          <h3
-            className="text-[26px] sm:text-[30px] font-bold leading-[1] tracking-[-0.02em] text-ivory-on-dark"
-            style={{ textShadow: "0 2px 12px rgba(0,0,0,0.5)" }}
-          >
-            {plan.name}
-            <span className="text-accent-soft">.</span>
-          </h3>
-          <p
-            className="mt-1.5 italic text-[12.5px] sm:text-[13px] text-ivory-on-dark/85 leading-snug"
-            style={{ textShadow: "0 2px 8px rgba(0,0,0,0.55)" }}
-          >
-            {plan.tagline}
-          </p>
-
-          <ul className="mt-3 space-y-1">
-            {plan.pointers.slice(0, 3).map((p) => (
-              <li
-                key={p}
-                className="flex items-start gap-2 text-[11.5px] sm:text-[12px] text-ivory-on-dark/95 leading-snug"
-                style={{ textShadow: "0 1px 4px rgba(0,0,0,0.65)" }}
-              >
-                <span
-                  aria-hidden
-                  className="mt-[3px] grid place-items-center h-3 w-3 shrink-0 rounded-full bg-accent-soft text-ink"
-                >
-                  <Check size={8} strokeWidth={3} />
-                </span>
-                <span>{p}</span>
-              </li>
-            ))}
-          </ul>
-
-          <span
-            className="mt-4 inline-flex items-center gap-1.5 text-[11px] font-semibold tracking-[0.14em] uppercase text-ivory-on-dark group-hover:text-accent-soft transition-colors duration-300"
-            style={{ textShadow: "0 1px 4px rgba(0,0,0,0.6)" }}
-          >
-            Read more
-            <ArrowUpRight
-              size={12}
-              strokeWidth={2}
-              className="transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
-            />
-          </span>
-        </div>
-      </div>
-    </a>
   );
 }

@@ -46,64 +46,11 @@ function countFor(slug: NotificationType) {
 }
 
 export function NotificationsBody({ children }: { children: ReactNode }) {
-  const rootRef = useRef<HTMLElement>(null);
-  const darkOverlayRef = useRef<HTMLDivElement>(null);
-
-  useGSAP(
-    () => {
-      const reduced =
-        typeof window !== "undefined" &&
-        window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-      if (reduced) {
-        gsap.set(darkOverlayRef.current, { opacity: 0 });
-        return;
-      }
-
-      const mm = gsap.matchMedia();
-
-      // Dark → white dissolve at the hero → body seam. Colour-matched
-      // to the PageHero's bottom band. Wrapper spans the whole
-      // notifications body (filter + feed), so the fade window has
-      // enough section-height to complete before the light content
-      // reads.
-      mm.add("(min-width: 768px)", () => {
-        gsap.fromTo(
-          darkOverlayRef.current,
-          { opacity: 1 },
-          {
-            opacity: 0,
-            ease: "sine.inOut",
-            scrollTrigger: {
-              trigger: rootRef.current,
-              start: "top 40%",
-              end: "top top",
-              scrub: 0.4,
-              invalidateOnRefresh: true,
-            },
-          },
-        );
-      });
-
-      mm.add("(max-width: 767px)", () => {
-        gsap.set(darkOverlayRef.current, { opacity: 0 });
-      });
-
-      ScrollTrigger.refresh();
-    },
-    { scope: rootRef },
-  );
-
   return (
     <section
-      ref={rootRef}
       data-nav-theme="light"
       className="relative w-full bg-background overflow-hidden"
     >
-      <div
-        ref={darkOverlayRef}
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-0 z-50 bg-[#06121f]"
-      />
       {children}
     </section>
   );
@@ -276,7 +223,7 @@ export function NotificationsFeed() {
             <article
               key={u.title}
               data-card
-              className="group relative overflow-hidden rounded-2xl border border-border bg-ivory p-6 sm:p-8 transition-all duration-500 hover:-translate-y-0.5 hover:border-border-strong hover:shadow-[0_30px_60px_-30px_rgba(11,18,32,0.18)]"
+              className="group relative overflow-hidden rounded-2xl border border-border bg-ivory p-4 sm:p-8 transition-all duration-500 hover:-translate-y-0.5 hover:border-border-strong hover:shadow-[0_30px_60px_-30px_rgba(11,18,32,0.18)]"
             >
               {/* Accent timeline underline — grows left→right on scroll,
                   matches the clientele-page motif. */}
@@ -287,13 +234,13 @@ export function NotificationsFeed() {
                 style={{ transform: "scaleX(0)" }}
               />
 
-              <div className="grid grid-cols-[auto_1px_1fr] gap-5 sm:gap-7">
+              <div className="grid grid-cols-[auto_1px_1fr] gap-3 sm:gap-7">
                 {/* Meta rail — big index. */}
-                <div className="flex min-w-[64px] flex-col items-start gap-1 sm:min-w-[80px]">
-                  <span className="serif font-bold text-[clamp(32px,3vw,44px)] leading-none tracking-[-0.02em] text-foreground">
+                <div className="flex min-w-[44px] sm:min-w-[80px] flex-col items-start gap-1">
+                  <span className="serif font-bold text-[clamp(26px,3vw,44px)] leading-none tracking-[-0.02em] text-foreground">
                     {String(i + 1).padStart(2, "0")}
                   </span>
-                  <span className="label text-muted-2 text-[10px]">
+                  <span className="label text-muted-2 text-[9px] sm:text-[10px]">
                     N° / {String(updates.length).padStart(2, "0")}
                   </span>
                 </div>
@@ -301,20 +248,20 @@ export function NotificationsFeed() {
                 <span aria-hidden="true" className="bg-border" />
 
                 <div className="flex min-w-0 flex-col">
-                  <div className="mb-3 flex flex-wrap items-center gap-3">
-                    <span className="inline-flex items-center gap-2 rounded-full bg-ink px-3 py-1 label text-[10px] text-ivory-on-dark">
+                  <div className="mb-2.5 sm:mb-3 flex flex-wrap items-center gap-2 sm:gap-3">
+                    <span className="inline-flex items-center gap-2 rounded-full bg-ink px-2.5 sm:px-3 py-1 label text-[9px] sm:text-[10px] text-ivory-on-dark">
                       <span
                         aria-hidden="true"
                         className="block h-1.5 w-1.5 rounded-full bg-accent"
                       />
                       {u.type}
                     </span>
-                    <span className="label text-muted-2 text-[10px]">
+                    <span className="label text-muted-2 text-[9px] sm:text-[10px]">
                       {u.date}
                     </span>
                   </div>
 
-                  <h3 className="serif text-[clamp(18px,1.7vw,24px)] leading-[1.2] tracking-tight text-foreground text-balance">
+                  <h3 className="serif text-[clamp(16px,1.7vw,24px)] leading-[1.25] tracking-tight text-foreground text-balance">
                     {u.title}
                   </h3>
                   <p className="mt-2 max-w-prose text-[13px] sm:text-[14px] leading-relaxed text-muted text-pretty">
@@ -324,12 +271,12 @@ export function NotificationsFeed() {
                   <Link
                     href="#"
                     aria-label={`Read brief on ${u.title}`}
-                    className="mt-5 inline-flex w-fit items-center gap-3 self-start text-[12px] font-medium tracking-tight text-accent"
+                    className="mt-4 sm:mt-5 inline-flex w-fit items-center gap-3 self-start text-[12px] font-medium tracking-tight text-accent"
                   >
                     Read brief
                     <span
                       aria-hidden="true"
-                      className="grid h-8 w-8 place-items-center rounded-full bg-accent/10 text-accent transition-all duration-500 group-hover:rotate-45 group-hover:bg-accent group-hover:text-ivory-on-dark"
+                      className="grid h-7 w-7 sm:h-8 sm:w-8 place-items-center rounded-full bg-accent/10 text-accent transition-all duration-500 group-hover:rotate-45 group-hover:bg-accent group-hover:text-ivory-on-dark"
                     >
                       <ArrowUpRight className="h-3.5 w-3.5" strokeWidth={2} />
                     </span>
