@@ -26,15 +26,14 @@ import {
 /**
  * Worries — "Common Challenges we Solve".
  *
- * Seventeen shipment anxieties displayed as inline editorial keyword
- * items with icon + label (no pill, no chip, no card). A three-word
- * sliding window auto-cycles: active items get an accent underline
- * (same treatment as the hero subtext), the rest recede. Hovering
- * any item pauses the cycle and pins that item as the active start.
- *
- * Preserved from the previous build:
- *   • Background video ("commom challenges.mp4")
- *   • Drifting Zoom-royal ambient glow
+ * Revised layout matching the reference: Zoom-gradient background
+ * (dark navy → royal blue → white) same as the "Categories we cater
+ * to" section. Centered editorial header with a green-pulse eyebrow
+ * pill and a serif title with italic accent on "we Solve." Below,
+ * a centered wrap of seventeen icon + label pills — a three-pill
+ * sliding spotlight fills white while resting pills stay translucent
+ * over the blue. Closes with a three-column stats bar (17 concerns /
+ * 25y handling / 01 accountable desk) as an editorial payoff.
  */
 
 type Concern = {
@@ -177,20 +176,10 @@ const SPOTLIGHT_MS = 1800;
 
 export function Worries() {
   const rootRef = useRef<HTMLElement>(null);
-  const videoRef = useRef<HTMLVideoElement>(null);
   const [activeIdx, setActiveIdx] = useState(0);
   // Pauses the auto-cycle while the reader is hovering the wall so the
   // interval doesn't shove them off the keyword they're reading.
   const pausedRef = useRef(false);
-
-  // Force play the background video after mount — muted + playsInline
-  // is required for programmatic autoplay to succeed.
-  useEffect(() => {
-    const v = videoRef.current;
-    if (!v) return;
-    v.muted = true;
-    v.play().catch(() => {});
-  }, []);
 
   // Auto-cycle the three-keyword sliding window. Respects reduced-motion
   // by holding on the first frame.
@@ -208,84 +197,72 @@ export function Worries() {
   return (
     <section
       ref={rootRef}
-      data-nav-theme="light"
-      className="relative w-full bg-white"
+      data-nav-theme="dark"
+      className="relative w-full overflow-hidden pt-14 sm:pt-16 lg:pt-20 pb-40 sm:pb-48 lg:pb-56"
+      style={{
+        // Single continuous background: an alpha-fading blue ramp
+        // layered over a white base. The blue holds solid through
+        // 0–65% (header + pills), then dissolves through decreasing
+        // alpha 65→100% so the very bottom of the section is pure
+        // white — matching the next (light) section's ground. One
+        // gradient, one seam.
+        background:
+          "linear-gradient(180deg, #071230 0%, #0D1E44 8%, #142457 18%, #1B2E6E 30%, #2E479A 45%, #4059B8 60%, rgba(64,89,184,0.75) 72%, rgba(90,115,206,0.40) 84%, rgba(90,115,206,0.12) 93%, rgba(90,115,206,0) 100%), #ffffff",
+      }}
     >
-      {/* --- FULL-WIDTH VIDEO HERO. Video spans the full section width
-          and is tall enough to hold the ENTIRE content stack (header
-          + keyword wall) as an overlay. All copy sits at the bottom
-          of the video with a bottom-anchored dark gradient for
-          legibility. --- */}
-      <div className="relative w-full min-h-screen lg:min-h-[140vh] overflow-hidden">
-        <video
-          ref={videoRef}
-          aria-hidden="true"
-          autoPlay
-          muted
-          loop
-          playsInline
-          preload="auto"
-          className="pointer-events-none absolute inset-0 z-0 h-full w-full object-cover"
-        >
-          <source src="/hero/common%20challenges.mp4" type="video/mp4" />
-        </video>
-
-        {/* Bottom-anchored darken so the overlay copy is legible over
-            any frame of the video; top stays untouched so the Earth
-            reads clean. Deeper darken now that both the headline AND
-            the keyword wall sit over the footage. */}
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-0 z-[1]"
-          style={{
-            background:
-              "linear-gradient(180deg, transparent 0%, transparent 30%, rgba(0,0,0,0.45) 60%, rgba(0,0,0,0.75) 100%)",
-          }}
-        />
-
-        {/* All content overlays the bottom half of the video: header
-            (eyebrow + title + description) plus the keyword wall,
-            stacked left-aligned in a max-w container. */}
-        <div className="absolute inset-x-0 bottom-0 z-[2] pb-10 sm:pb-14 lg:pb-20">
-          <div className="mx-auto max-w-[1320px] px-6 sm:px-10 lg:px-14 xl:px-20">
-            <span className="inline-flex items-center gap-2 text-[11px] font-semibold tracking-[0.22em] uppercase text-white/85" style={{ textShadow: "0 2px 12px rgba(0,0,0,0.5)" }}>
+      <div className="relative z-[2] mx-auto max-w-[1240px] px-6 sm:px-10 lg:px-14">
+        {/* -------- Centered header — eyebrow pill + serif title with
+            italic accent + subtitle. Matches the reference screenshot's
+            layout language. -------- */}
+        <div className="max-w-[1120px] mx-auto text-center">
+          {/* Eyebrow — rounded pill with a green accent dot + label */}
+          <span className="inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/[0.06] backdrop-blur-sm px-4 py-2 text-[10.5px] font-semibold tracking-[0.26em] uppercase text-white/90">
+            <span aria-hidden="true" className="relative flex h-2 w-2">
               <span
-                aria-hidden="true"
-                className="h-1.5 w-1.5 rounded-full bg-white"
+                className="absolute inline-flex h-full w-full rounded-full opacity-70 animate-ping"
+                style={{ background: "#4ADE80" }}
               />
-              Sound familiar?
+              <span
+                className="relative inline-flex h-2 w-2 rounded-full"
+                style={{ background: "#4ADE80" }}
+              />
             </span>
+            Sound familiar?
+          </span>
 
-            <h2
-              className="serif mt-4 sm:mt-5 text-[clamp(34px,4.6vw,72px)] leading-[1] tracking-[-0.035em] text-white"
+          <h2
+            className="serif mt-5 sm:mt-6 text-[clamp(28px,4vw,62px)] leading-[1.05] tracking-[-0.028em] text-white whitespace-nowrap"
+            style={{ fontWeight: 800 }}
+          >
+            Common Challenges{" "}
+            <span
+              className="serif-italic"
               style={{
-                fontWeight: 800,
-                textShadow: "0 4px 24px rgba(0,0,0,0.55), 0 2px 8px rgba(0,0,0,0.4)",
+                color: "#B4C2ED",
+                fontWeight: 700,
               }}
             >
-              Common Challenges
-              <br />
               we Solve.
-            </h2>
+            </span>
+          </h2>
 
-            <p
-              className="mt-4 sm:mt-5 leading-[1.5] max-w-[600px] text-balance text-[14px] sm:text-[15.5px] text-white/90"
-              style={{
-                textShadow: "0 2px 12px rgba(0,0,0,0.5)",
-              }}
-            >
-              Every shipment carries the same recurring anxieties. That&apos;s
-              exactly the weight we take off your desk.
-            </p>
+          <p className="mt-4 sm:mt-5 text-white/78 leading-[1.55] max-w-[620px] mx-auto text-balance text-[14.5px] sm:text-[16px]">
+            Every shipment carries the same recurring anxieties. That&apos;s
+            exactly the weight we take off your desk.
+          </p>
+        </div>
 
-            {/* -------- Keyword wall — inline editorial items with the
-                sliding three-word underline highlight. White text on
-                the video, same style language as the header above. -------- */}
-            <div
-              onMouseEnter={() => { pausedRef.current = true; }}
-              onMouseLeave={() => { pausedRef.current = false; }}
-              className="relative mt-8 sm:mt-10 lg:mt-12 flex flex-wrap items-center justify-start gap-x-5 sm:gap-x-6 lg:gap-x-7 gap-y-3.5 sm:gap-y-4 lg:gap-y-5"
-            >
+        {/* -------- Keyword pill grid — 17 concerns as icon + label
+            pills arranged in a centered wrap. Sliding three-pill
+            spotlight brightens as it advances. Resting pills use a
+            subtle white/dark tint that reads on the blue portion of
+            the gradient; active pills fill solid white with dark
+            text for high-contrast spotlighting. -------- */}
+        <div
+          onMouseEnter={() => { pausedRef.current = true; }}
+          onMouseLeave={() => { pausedRef.current = false; }}
+          className="relative mt-8 sm:mt-10 lg:mt-14 flex flex-wrap items-center justify-center gap-2 sm:gap-2.5"
+        >
           {concerns.map((c, i) => {
             const Icon = c.icon;
             const isActive =
@@ -300,27 +277,35 @@ export function Worries() {
                 onFocus={() => setActiveIdx(i)}
                 aria-label={c.label}
                 aria-pressed={isActive}
-                className="group inline-flex items-center gap-2 sm:gap-2.5 text-left rounded transition-colors duration-500 focus:outline-none focus-visible:ring-1 focus-visible:ring-black/30"
+                className="group inline-flex items-center gap-2 sm:gap-2.5 rounded-full border transition-all duration-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/50 px-3.5 sm:px-4 py-2 sm:py-[9px]"
+                style={{
+                  background: isActive
+                    ? "#ffffff"
+                    : "rgba(255,255,255,0.05)",
+                  borderColor: isActive
+                    ? "#ffffff"
+                    : "rgba(255,255,255,0.20)",
+                  boxShadow: isActive
+                    ? "0 14px 30px -12px rgba(255,255,255,0.35), 0 4px 10px -4px rgba(4,10,24,0.35)"
+                    : "0 1px 2px rgba(4,10,24,0.15)",
+                  transform: isActive ? "translateY(-1px)" : "translateY(0)",
+                  backdropFilter: "blur(6px)",
+                  WebkitBackdropFilter: "blur(6px)",
+                }}
               >
                 <Icon
-                  className="h-[15px] w-[15px] sm:h-4 sm:w-4 lg:h-[18px] lg:w-[18px] shrink-0 transition-colors duration-500"
+                  className="h-[14px] w-[14px] sm:h-4 sm:w-4 lg:h-[17px] lg:w-[17px] shrink-0 transition-colors duration-500"
                   style={{
-                    color: isActive ? "#ffffff" : "rgba(255,255,255,0.55)",
-                    filter: "drop-shadow(0 2px 6px rgba(0,0,0,0.5))",
+                    color: isActive ? "#0D1E44" : "rgba(255,255,255,0.75)",
                   }}
                   strokeWidth={2}
                   aria-hidden="true"
                 />
                 <span
-                  className="font-display uppercase tracking-[0.02em] text-[12.5px] sm:text-[14px] lg:text-[15.5px] leading-none whitespace-nowrap transition-all duration-500"
+                  className="font-display uppercase tracking-[0.02em] text-[11.5px] sm:text-[12.5px] lg:text-[13.5px] leading-none whitespace-nowrap transition-colors duration-500"
                   style={{
-                    color: isActive ? "#ffffff" : "rgba(255,255,255,0.7)",
-                    fontWeight: isActive ? 800 : 600,
-                    textDecoration: isActive ? "underline" : "none",
-                    textDecorationColor: "#ffffff",
-                    textDecorationThickness: "2px",
-                    textUnderlineOffset: "6px",
-                    textShadow: "0 2px 10px rgba(0,0,0,0.5)",
+                    color: isActive ? "#0D1E44" : "rgba(255,255,255,0.92)",
+                    fontWeight: isActive ? 700 : 600,
                   }}
                 >
                   {c.label}
@@ -328,9 +313,8 @@ export function Worries() {
               </button>
             );
           })}
-            </div>
-          </div>
         </div>
+
       </div>
     </section>
   );

@@ -25,9 +25,10 @@ const statMeta = [
 ];
 
 const bodySegments: { text: string; italic?: boolean }[] = [
-  { text: "Navkar Global Sourcing is a Mumbai studio shaping export-import practice with" },
-  { text: "restraint, regulatory honesty", italic: true },
-  { text: "and a devotion to detail — every consignment tuned to the FTP, customs and PGA conditions that decide whether it sails on time." },
+  { text: "Your trusted partner for end-to-end global sourcing, connecting businesses with" },
+  { text: "reliable manufacturers worldwide.", italic: true },
+  { text: "From supplier verification to quality assurance and timely delivery, we simplify procurement with" },
+  { text: "transparency and confidence.", italic: true },
 ];
 
 export function IntroStatement() {
@@ -304,7 +305,7 @@ export function IntroStatement() {
     <section
       ref={rootRef}
       data-nav-theme="light"
-      className="relative z-10 overflow-hidden min-h-screen bg-background"
+      className="relative z-10 overflow-hidden min-h-screen flex flex-col justify-center bg-background"
     >
       {/* Inline SectionShell equivalent — kept as a plain <div> so we
           don't nest a second <section data-nav-theme> inside the outer
@@ -313,9 +314,9 @@ export function IntroStatement() {
           data-nav-theme is redundantly set here as a safeguard. */}
       <div
         data-nav-theme="light"
-        className="relative z-30 pt-32 sm:pt-40 md:pt-44 pb-16 sm:pb-24 px-5 sm:px-10 wide:px-16"
+        className="relative z-30 py-16 sm:py-20 px-5 sm:px-10 wide:px-16"
       >
-        <div className="mx-auto max-w-[1320px] wide:max-w-[1560px]">
+        <div className="mx-auto w-full max-w-[1320px] wide:max-w-[1560px]">
           {/* ---------- Centered philosophy text ---------- */}
           <div className="max-w-6xl mx-auto text-center">
             <div className="flex justify-center">
@@ -333,19 +334,19 @@ export function IntroStatement() {
             </div>
             <h2
               ref={headlineRef}
-              className="serif mt-6 sm:mt-8 text-[clamp(44px,7vw,128px)] leading-[0.98] tracking-[-0.035em] text-black text-balance uppercase"
+              className="serif mt-4 sm:mt-6 text-[clamp(38px,5.4vw,96px)] leading-[0.98] tracking-[-0.035em] text-black text-balance uppercase"
               style={{ fontWeight: 800 }}
             >
+              <span data-word className="inline-block">Your</span>{" "}
+              <span data-word className="inline-block">End-to-End</span>{" "}
+              <span data-word className="inline-block">Global</span>{" "}
               <span data-word className="inline-block">Sourcing</span>{" "}
-              <span data-word className="inline-block">that</span>{" "}
-              <span data-word className="inline-block">sails</span>{" "}
-              <span data-word className="inline-block">on</span>{" "}
-              <span data-word className="inline-block">time.</span>
+              <span data-word className="inline-block">Partner</span>
             </h2>
 
             <div
               ref={bodyRef}
-              className="mt-10 sm:mt-12 flex flex-col items-center gap-8"
+              className="mt-6 sm:mt-8 flex flex-col items-center gap-5 sm:gap-6"
             >
               <p className="text-[16px] sm:text-[18px] text-foreground max-w-4xl leading-[1.55] text-balance">
                 {bodySegments.flatMap((seg, segI) =>
@@ -353,7 +354,7 @@ export function IntroStatement() {
                     <Fragment key={`${segI}-${wI}`}>
                       <span
                         data-body-word
-                        className={`inline-block${seg.italic ? " serif-italic text-foreground font-bold" : ""}`}
+                        className={`inline-block${seg.italic ? " italic font-semibold" : ""}`}
                       >
                         {w}
                       </span>{" "}
