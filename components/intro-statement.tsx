@@ -305,7 +305,7 @@ export function IntroStatement() {
     <section
       ref={rootRef}
       data-nav-theme="light"
-      className="relative z-10 overflow-hidden min-h-screen flex flex-col justify-center bg-background"
+      className="relative z-10 overflow-hidden min-h-screen bg-background"
     >
       {/* Inline SectionShell equivalent — kept as a plain <div> so we
           don't nest a second <section data-nav-theme> inside the outer
@@ -314,7 +314,7 @@ export function IntroStatement() {
           data-nav-theme is redundantly set here as a safeguard. */}
       <div
         data-nav-theme="light"
-        className="relative z-30 py-16 sm:py-20 px-5 sm:px-10 wide:px-16"
+        className="relative z-30 pt-20 sm:pt-24 pb-16 sm:pb-20 px-5 sm:px-10 wide:px-16"
       >
         <div className="mx-auto w-full max-w-[1320px] wide:max-w-[1560px]">
           {/* ---------- Centered philosophy text ---------- */}
@@ -334,7 +334,7 @@ export function IntroStatement() {
             </div>
             <h2
               ref={headlineRef}
-              className="serif mt-4 sm:mt-6 text-[clamp(38px,5.4vw,96px)] leading-[0.98] tracking-[-0.035em] text-black text-balance uppercase"
+              className="serif mt-6 sm:mt-8 text-[clamp(48px,7.5vw,132px)] leading-[0.98] tracking-[-0.035em] text-black text-balance uppercase"
               style={{ fontWeight: 800 }}
             >
               <span data-word className="inline-block">Your</span>{" "}
